@@ -14,10 +14,10 @@ company_data = df[df['name'] == selected_company].iloc[0]  # Prend la première 
 st.markdown(f"## Informations pour l'entreprise **{selected_company}**")
 
 # Disposition en colonnes
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([5, 2])
 
 with col1:
-    st.image(company_data['logo'], caption=f"Logo de {selected_company}", use_column_width=True)
+    st.image(company_data['logo'], caption=f"Logo de {selected_company}", use_container_width=True)
     st.markdown(f"### Description :")
     st.write(company_data['description'])
 
