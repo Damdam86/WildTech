@@ -1,0 +1,598 @@
+[
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Richard LEMAIRE",
+                "job": "Délégué Général"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/710969/object/9ef18c06",
+        "tags": "Offreur de services"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Jonathan PEREZ",
+                "job": "Directeur de Projet"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/692031/object/9ef18c06",
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Jacques GOUDARD",
+                "job": "Directeur Commercial"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/730880/object/9ef18c06",
+        "tags": "Sponsors"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Alexandre FRANC",
+                "job": "Responsable achats"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/731373/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "ADPIX SAS",
+        "contacts": [
+            {
+                "name": "Baptiste BORDEL",
+                "job": "Ingénieur technico-commercial"
+            }
+        ],
+        "website": null,
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Damien VERNAY",
+                "job": "Directeur commercial"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/679006/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Frederic BREUSSIN",
+                "job": "Président"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/712038/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Florence HAY",
+                "job": "Responsable Innovation"
+            }
+        ],
+        "website": null,
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Guillaume POIRIER",
+                "job": "Responsable Innovation"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/680845/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Laurent LEGENDRE",
+                "job": "Directeur de Division"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/680790/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Mathieu AUBERT",
+                "job": "Responsable Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/710470/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Emmanuel ARBARETIER",
+                "job": "Responsable Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/679921/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Sebastien TOUCHAIS",
+                "job": "Directeur Associé"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/704959/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Aketys",
+        "contacts": [
+            {
+                "name": "Christian FAVRE",
+                "job": "Directeur Associé"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/735383/object/9ef18c06",
+        "tags": "Offreur de technologies en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Mélina PIONIN",
+                "job": "Assistant commercial"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/680593/object/9ef18c06",
+        "tags": "Offreur de technologies en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Michael HADDAD",
+                "job": "Directeur Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/711016/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Luc JUNG",
+                "job": "Directeur Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/711026/object/9ef18c06",
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Joël VANDEN BOSCH",
+                "job": "Directeur du développement"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/704887/object/9ef18c06",
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Aline VO VAN",
+                "job": "Ingénieur commercial ou d'affaires"
+            },
+            {
+                "name": "",
+                "job": ""
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/731135/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Richard VILTE",
+                "job": "Responsable export"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/710666/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Constance TERRIER",
+                "job": "Chargé de mission"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/690332/object/9ef18c06",
+        "tags": "Agence de développement économique"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Nicolas SENSEY",
+                "job": "Responsable Commercial"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/710669/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Raffaella CANU",
+                "job": "Chargé de mission"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/712935/object/9ef18c06",
+        "tags": "Agence de développement économique"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Mathieu DELAPLACE",
+                "job": "Conférencier"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/681201/object/9ef18c06",
+        "tags": "Agence de développement économique - En ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Eric DUPLANIL",
+                "job": "Co-Fondateur"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/728297/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Florian SPOHR",
+                "job": "Responsable Commercial"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/712982/object/9ef18c06",
+        "tags": "Offreur de technologies en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Alexandre QUARREY",
+                "job": "Président"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/704694/object/9ef18c06",
+        "tags": "Offreur de services"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Stephane GOMBERT",
+                "job": "Responsable des Partenariats"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/710474/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Christian DREESEN",
+                "job": "Responsable Commercial"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/680153/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Denis GUARALDO",
+                "job": "Responsable R&D"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/718431/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Laurent MAZO",
+                "job": "Responsable achats"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/685651/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Yannick MERIC",
+                "job": ""
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/724061/object/9ef18c06",
+        "tags": "Offreur de technologies"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Cédric FAIVRE",
+                "job": "Directeur de Division"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/679495/object/9ef18c06",
+        "tags": "Offreur de services"
+    },
+    {
+        "company_name": "Associação TICE.PT",
+        "contacts": [
+            {
+                "name": "Luis Miguel DA SILVA",
+                "job": "Project Manager"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/740131/object/9ef18c06",
+        "tags": "Partenaire"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Matthieu AYFRE",
+                "job": "Responsable Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/727422/object/9ef18c06",
+        "tags": "Agence de développement économique - En ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Brice VARINI",
+                "job": "Directeur Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/715019/object/9ef18c06",
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Gilles CAVALLUCCI",
+                "job": "Directeur du développement"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/731679/object/9ef18c06",
+        "tags": "Offreur de services"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Thomas SGARBI",
+                "job": "Responsable Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/729738/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Jeff CHEUNG",
+                "job": "Responsable sourcing"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/732110/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Christel JACQUET",
+                "job": "Chargée de mission innovation"
+            },
+            {
+                "name": "",
+                "job": ""
+            },
+            {
+                "name": "",
+                "job": ""
+            },
+            {
+                "name": "",
+                "job": ""
+            },
+            {
+                "name": "",
+                "job": ""
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/663725/object/9ef18c06",
+        "tags": "Partenaire"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Sébastien ENGELEN",
+                "job": "Chef de projet R&D"
+            },
+            {
+                "name": "",
+                "job": ""
+            }
+        ],
+        "website": null,
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Nathalie MASSON",
+                "job": "Responsable des Partenariats"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/712571/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Camille OGER",
+                "job": "Chef de projet R&D"
+            }
+        ],
+        "website": null,
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Gustavo PIERANGELINI",
+                "job": "Directeur Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/710424/object/9ef18c06",
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Sébastien HERPOEL",
+                "job": "DSI / Directeur Informatique"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/711024/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Brice CORNET",
+                "job": "Ingénieur R&D"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/679839/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "Frederic MALLARD",
+                "job": "Responsable R&D"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/716138/object/9ef18c06",
+        "tags": "Donneur d'ordre"
+    },
+    {
+        "company_name": "Nom introuvable",
+        "contacts": [
+            {
+                "name": "David NEUMAN",
+                "job": "Responsable Innovation"
+            }
+        ],
+        "website": "https://minalogicbusinessmeetings-2024.vimeet.events/fr/forward/740327/object/9ef18c06",
+        "tags": "Donneur d'ordre en ligne"
+    }
+]

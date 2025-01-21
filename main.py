@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 
 # Charger le fichier CSV
-df = pd.read_csv('bpifrance_startups_data2.csv')
+df = pd.read_csv('merged_df.csv', sep=';')
 
 # Ajouter un sélecteur pour choisir une entreprise
-selected_company = st.selectbox("Sélectionnez une entreprise :", df['name'].dropna().unique())
+selected_company = st.selectbox("Sélectionnez une entreprise :", df['nom'].dropna().unique())
 
 # Filtrer les données pour l'entreprise sélectionnée
-company_data = df[df['name'] == selected_company].iloc[0]  # Prend la première ligne correspondante
+company_data = df[df['nom'] == selected_company].iloc[0]  # Prend la première ligne correspondante
 
 # Afficher les informations de l'entreprise sélectionnée
 st.markdown(f"## Informations pour l'entreprise **{selected_company}**")
@@ -17,19 +17,19 @@ st.markdown(f"## Informations pour l'entreprise **{selected_company}**")
 col1, col2 = st.columns([5, 2])
 
 with col1:
-    st.image(company_data['logo'], caption=f"Logo de {selected_company}", use_container_width=True)
+    st.image(company_data['logo_x'], caption=f"Logo de {selected_company}", use_container_width=True)
     st.markdown(f"### Description :")
-    st.write(company_data['description'])
+    st.write(company_data['description_x'])
 
 with col2:
     st.markdown(f"### Site Web :")
-    if pd.notna(company_data['website']):
-        st.markdown(f"[Visitez le site]( {company_data['website']} )")
+    if pd.notna(company_data['site_web_x']):
+        st.markdown(f"[Visitez le site]( {company_data['site_web_x']} )")
     else:
         st.write("Site non disponible")
     
     st.markdown("### Hashtags :")
-    st.write(", ".join(company_data['hashtags']) if isinstance(company_data['hashtags'], list) else "Aucun hashtag disponible.")
+    st.write(", ".join(company_data['mots_cles_x']) if isinstance(company_data['mots_cles_x'], list) else "Aucun hashtag disponible.")
 
 # Produits et secteurs
 st.markdown("### Produits et secteurs :")
@@ -38,4 +38,4 @@ st.write("**Secteurs :**", ", ".join(company_data['sectors']) if isinstance(comp
 
 # Financements
 st.markdown("### Informations supplémentaires :")
-st.write(f"**Financement total :** {company_data['total_funding'] if pd.notna(company_data['total_funding']) else 'Non spécifié'}")
+st.write(f"**Financement total :** {company_data['Montant'] if pd.notna(company_data['Montant']) else 'Non spécifié'}")
