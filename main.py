@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # Charger le fichier CSV
-df = pd.read_csv('https://raw.githubusercontent.com/Damdam86/WildTech/main/merged_df.csv', sep=';')
+df = pd.read_csv('https://github.com/Damdam86/WildTech/blob/4b2cfaf2b349366de775681e001158886cf68d43/merged_df.csv', sep=';')
 
 # Ajouter un sélecteur pour choisir une entreprise
 selected_company = st.selectbox("Sélectionnez une entreprise :", df['nom'].dropna().unique())
