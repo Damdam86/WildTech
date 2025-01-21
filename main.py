@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
+
+st.write("Répertoire courant :", os.getcwd())
 
 # Charger le fichier CSV
 df = pd.read_csv('./merged_df.csv', sep=';')
