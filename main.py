@@ -3,7 +3,7 @@ import pandas as pd
 
 # Charger le fichier CSV
 url = 'https://wildstartech.s3.eu-west-3.amazonaws.com/merged_df.csv'
-df = pd.read_csv('url', sep=';')
+df = pd.read_csv(url, sep=';')
 
 # Ajouter un sélecteur pour choisir une entreprise
 selected_company = st.selectbox("Sélectionnez une entreprise :", df['nom'].dropna().unique())
