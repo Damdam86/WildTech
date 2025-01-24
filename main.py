@@ -13,6 +13,8 @@ company_data = df[df['nom'] == selected_company].iloc[0]  # Prend la première l
 
 # Afficher les informations de l'entreprise sélectionnée
 st.markdown(f"## Informations pour l'entreprise **{selected_company}**")
+nbre_societe = len(df['nom'])
+st.write(nbre_societe)
 
 # Disposition en colonnes
 col1, col2 = st.columns([5, 2])
@@ -31,6 +33,7 @@ with col2:
     
     st.markdown("### Hashtags :")
     st.write(", ".join(company_data['mots_cles_x']) if isinstance(company_data['mots_cles_x'], list) else "Aucun hashtag disponible.")
+    st.write(company_data['mots_cles_x'])
 
 # Produits et secteurs
 st.markdown("### Produits et secteurs :")
