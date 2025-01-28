@@ -1,201 +1,134 @@
-import time
+from playwright.sync_api import sync_playwright
 import csv
 from tqdm import tqdm
-from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
-# Selenium imports
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-
-# Nombre total de pages
-NB_PAGES = 29
-
-BASE_URL = "https://www.minalogic.com/annuaire"
-PAGE_URL = "https://www.minalogic.com/annuaire/page/{}"
+BASE_URL = "https://www.minalogic.com/annuaire/"
+PAGES = 29  # Nombre total de pages à scraper
 
 
-def init_driver(headless=True):
-    """
-    Initialise un driver Chrome Selenium. Si headless=True, pas d'interface graphique.
-    """
-    from selenium.webdriver.chrome.options import Options
-    options = Options()
-    if headless:
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--disable-dev-shm-usage")
-    # Installe le bon ChromeDriver si pas déjà présent
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
-
-
-def get_company_links_selenium(driver, page_number):
-    """
-    Charge la page (page_number) dans Selenium, attend (si nécessaire),
-    parse avec BeautifulSoup, et récupère les liens.
-    """
-    if page_number == 1:
-        url = BASE_URL
-    else:
-        url = PAGE_URL.format(page_number)
-
-    driver.get(url)
-    # On peut attendre un peu que le JS charge les éléments si nécessaire
-    time.sleep(2)  # Ajustez si le site est lent
-
-    # Récupérer la page_source
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-    
-    # Repérer les blocs de fiches. Souvent : <li class="nq-c-Cards-list-item"><a class="nq-c-Card" href="...">
-    cards = soup.select("li.nq-c-Cards-list-item a.nq-c-Card")
-    links = [card.get('href') for card in cards if card.get('href')]
+def get_company_links(page, url):
+    """Récupère les liens des entreprises sur une page donnée."""
+    page.goto(url)
+    links = []
+    # On cherche tous les liens contenant '/annuaire/'
+    elements = page.query_selector_all('a[href*="/annuaire/"]')
+    for element in elements:
+        href = element.get_attribute("href")
+        if href:
+            # Convertir en absolu :
+            full_url = urljoin("https://www.minalogic.com", href)
+            # Éviter la pagination (on ne veut pas /annuaire/page/xx)
+            if "/annuaire/page/" not in full_url:
+                links.append(full_url)
     return links
 
 
-def parse_company_page(url, driver=None):
-    """
-    Ouvre la page détaillée d'une entreprise via Selenium,
-    parse le HTML avec BeautifulSoup, et retourne les infos.
-    
-    Option : vous pouvez utiliser le driver Selenium existant.
-    """
-    if driver is None:
-        # Cas où on crée un driver juste pour cette page
-        driver_local = init_driver(headless=True)
-        driver_local.get(url)
-        time.sleep(2)
-        soup = BeautifulSoup(driver_local.page_source, "html.parser")
-        driver_local.quit()
-    else:
-        # Réutilise le driver existant (moins efficace si on doit enchaîner beaucoup d'URL)
-        driver.get(url)
-        time.sleep(2)
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-
-    # Nom
-    name_tag = soup.select_one("h1.nq-c-SingleHead-title")
-    name = name_tag.get_text(strip=True) if name_tag else ""
-
-    # Logo
-    logo_tag = soup.select_one("div.nq-c-SingleHead-logo img")
-    logo_url = logo_tag.get("src") if logo_tag else ""
-
-    # Description
-    desc_tag = soup.select_one("div.nq-c-SingleDetail.nq-c-Wysiwyg")
-    description = desc_tag.get_text("\n", strip=True) if desc_tag else ""
-
-    # Infos (premier bloc)
-    info_blocks = soup.select("div.nq-c-SingleInfo-block")
-    infos_dict = {}
-    if len(info_blocks) > 0:
-        detail_items = info_blocks[0].select(".nq-c-SingleInfo-block-detail-item")
-        for item in detail_items:
-            label_tag = item.select_one("span")
-            if not label_tag:
-                continue
-            label = label_tag.get_text(strip=True)
-            value_tag = item.select_one("p")
-            if value_tag:
-                value_text = value_tag.get_text(", ", strip=True)
-            else:
-                value_text = item.get_text(strip=True)
-            infos_dict[label] = value_text
-
-    # Contact (deuxième bloc)
-    contact_dict = {}
-    if len(info_blocks) > 1:
-        detail_items = info_blocks[1].select(".nq-c-SingleInfo-block-detail-item")
-        for item in detail_items:
-            label_tag = item.select_one("span")
-            if not label_tag:
-                continue
-            label = label_tag.get_text(strip=True)
-            value_tag = item.select_one("p")
-            if value_tag:
-                value_text = value_tag.get_text("\n", strip=True)
-            else:
-                value_text = item.get_text(strip=True)
-            contact_dict[label] = value_text
-
-        # Liens (site web, twitter, linkedin...)
-        links_tags = info_blocks[1].select(".nq-c-SingleInfo-block-links a")
-        extra_links = {}
-        for link in links_tags:
-            text = link.get_text(strip=True)
-            href = link.get("href")
-            if not text:
-                # On essaie de deviner
-                if "twitter" in href.lower():
-                    text = "Twitter"
-                elif "linkedin" in href.lower():
-                    text = "LinkedIn"
-                else:
-                    text = "Autre"
-            extra_links[text] = href
-        contact_dict["Liens"] = extra_links
-
-    data = {
-        "url": url,
-        "name": name,
-        "logo_url": logo_url,
-        "description": description,
-        "infos": infos_dict,
-        "contact": contact_dict,
+def get_company_details(page, company_url):
+    """Récupère les détails d'une entreprise à partir de son URL."""
+    page.goto(company_url)
+    details = {
+        'url': company_url,
+        'logo': None,
+        'name': None,
+        'description': None,
+        'infos': {},
+        'contact': {}
     }
+    
+    # Logo
+    logo_element = page.query_selector('div.nq-c-SingleHead-logo img')
+    if logo_element:
+        details['logo'] = logo_element.get_attribute("src")
+    
+    # Nom de la société
+    name_element = page.query_selector('h1.nq-c-SingleHead-title')
+    if name_element:
+        details['name'] = name_element.text_content().strip()
+    
+    # Description
+    description_element = page.query_selector('div.nq-c-SingleDetail')
+    if description_element:
+        details['description'] = description_element.text_content().strip()
+    
+    # Infos
+    info_blocks = page.query_selector_all('div.nq-c-SingleInfo-block')
+    for block in info_blocks:
+        title_element = block.query_selector('div.nq-c-SingleInfo-block-title')
+        if title_element:
+            title_text = title_element.text_content().strip()
+            if "Infos" in title_text:
+                items = block.query_selector_all('div.nq-c-SingleInfo-block-detail-item')
+                for item in items:
+                    key_el = item.query_selector('span')
+                    if key_el:
+                        key = key_el.text_content().strip()
+                        # Retirer la clé du texte global
+                        item_text = item.text_content().strip()
+                        value = item_text.replace(key, '').strip()
+                        details['infos'][key] = value
+            elif "Contact" in title_text:
+                items = block.query_selector_all('div.nq-c-SingleInfo-block-detail-item')
+                for item in items:
+                    key_el = item.query_selector('span')
+                    if key_el:
+                        key = key_el.text_content().strip()
+                        item_text = item.text_content().strip()
+                        value = item_text.replace(key, '').strip()
+                        details['contact'][key] = value
 
-    return data
+    return details
 
 
 def main():
-    # 1) Lancement du driver
-    driver = init_driver(headless=True)
+    with sync_playwright() as p:
+        # Lancer le navigateur
+        browser = p.chromium.launch(headless=True)  # headless=False pour déboguer
+        page = browser.new_page()
+        
+        # Étape 1 : Récupérer tous les liens des entreprises sur chaque page
+        print("Récupération des liens des entreprises...")
+        all_links = []
+        for i in range(1, PAGES + 1):
+            if i == 1:
+                # Page 1 est BASE_URL
+                url = BASE_URL
+            else:
+                url = f"{BASE_URL}page/{i}/"
+            links = get_company_links(page, url)
+            all_links.extend(links)
+            print(f"Page {i} traitée. {len(links)} liens trouvés.")
 
-    # 2) Récupération de tous les liens d'entreprises
-    all_links = []
-    for page_number in tqdm(range(1, NB_PAGES + 1), desc="Pages"):
-        links = get_company_links_selenium(driver, page_number)
-        all_links.extend(links)
+        # Supprimer les doublons
+        all_links = list(set(all_links))
+        print(f"{len(all_links)} liens d'entreprises récupérés (uniques).")
 
-    print(f"Nombre total de fiches récupérées : {len(all_links)}")
-    if not all_links:
-        print("Aucun lien trouvé : vérifier si le site n'est pas bloqué ou a changé de structure.")
-        driver.quit()
-        return
-
-    # 3) Pour chaque lien, on ouvre la page et on parse
-    all_data = []
-    for link in tqdm(all_links, desc="Fiches"):
-        try:
-            data = parse_company_page(link, driver=driver)
-            all_data.append(data)
-        except Exception as e:
-            print(f"Erreur en traitant {link}: {e}")
-
-    # On peut fermer le driver ici
-    driver.quit()
-
-    # 4) Sauvegarde en CSV
-    csv_filename = "minalogic_annuaire.csv"
-    with open(csv_filename, mode="w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, delimiter=";")
-        header = ["url", "name", "logo_url", "description", "infos", "contact"]
-        writer.writerow(header)
-
-        for item in all_data:
-            writer.writerow([
-                item["url"],
-                item["name"],
-                item["logo_url"],
-                item["description"],
-                str(item["infos"]),
-                str(item["contact"])
-            ])
-
-    print(f"Scraping terminé ! Résultats sauvegardés dans {csv_filename}")
+        # Étape 2 : Récupérer les détails de chaque entreprise
+        print("Récupération des détails des entreprises...")
+        all_details = []
+        for link in tqdm(all_links, desc="Entreprises traitées"):
+            try:
+                details = get_company_details(page, link)
+                all_details.append(details)
+            except Exception as e:
+                print(f"Erreur pour {link}: {e}")
+        
+        # Étape 3 : Sauvegarder les résultats dans un fichier CSV
+        print("Sauvegarde des données dans un fichier CSV...")
+        csv_filename = 'entreprises.csv'
+        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+            fieldnames = ['url', 'logo', 'name', 'description', 'infos', 'contact']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            
+            for details in all_details:
+                # Convertir les dictionnaires en chaînes de caractères
+                details['infos'] = str(details['infos'])
+                details['contact'] = str(details['contact'])
+                writer.writerow(details)
+        
+        print(f"Scraping terminé. Les données ont été sauvegardées dans '{csv_filename}'.")
+        browser.close()
 
 
 if __name__ == "__main__":
