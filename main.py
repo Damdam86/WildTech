@@ -1,45 +1,45 @@
 import streamlit as st
 import pandas as pd
-import altair as alt
 
-# Titre principal
-st.title("Startups France - Dashboard")
+# Charger le fichier CSV
+url = 'https://wildstartech.s3.eu-west-3.amazonaws.com/merged_df.csv'
+df = pd.read_csv(url, sep=';')
 
-# Barre de recherche (facultative)
-search = st.text_input("Rechercher une startup...")
+# Ajouter un sélecteur pour choisir une entreprise
+selected_company = st.selectbox("Sélectionnez une entreprise :", df['nom'].dropna().unique())
 
-# Indicateurs clés (dans des colonnes)
-col1, col2, col3, col4 = st.columns(4)
+# Filtrer les données pour l'entreprise sélectionnée
+company_data = df[df['nom'] == selected_company].iloc[0]  # Prend la première ligne correspondante
+
+# Afficher les informations de l'entreprise sélectionnée
+st.markdown(f"## Informations pour l'entreprise **{selected_company}**")
+nbre_societe = len(df['nom'])
+st.write(nbre_societe)
+
+# Disposition en colonnes
+col1, col2 = st.columns([5, 2])
 
 with col1:
-    st.metric("Total Startups", "2,543")
+    st.image(company_data['logo_x'], caption=f"Logo de {selected_company}", use_container_width=True)
+    st.markdown(f"### Description :")
+    st.write(company_data['description_x'])
+
 with col2:
-    st.metric("Levées de fonds (mois)", "28")
-with col3:
-    st.metric("Fondateurs", "3,721")
-with col4:
-    st.metric("Croissance (mois)", "+12.3%")
+    st.markdown(f"### Site Web :")
+    if pd.notna(company_data['site_web_x']):
+        st.markdown(f"[Visitez le site]( {company_data['site_web_x']} )")
+    else:
+        st.write("Site non disponible")
+    
+    st.markdown("### Hashtags :")
+    st.write(", ".join(company_data['mots_cles_x']) if isinstance(company_data['mots_cles_x'], list) else "Aucun hashtag disponible.")
+    st.write(company_data['mots_cles_x'])
 
-# Données d'exemple pour les levées de fonds par mois
-df = pd.DataFrame({
-    'Mois': ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
-    'Levées de fonds': [8, 18, 14, 25, 30, 22]  # en millions, par exemple
-})
+# Produits et secteurs
+st.markdown("### Produits et secteurs :")
+st.write("**Produits :**", ", ".join(company_data['product_types']) if isinstance(company_data['product_types'], list) else "Non spécifié")
+st.write("**Secteurs :**", ", ".join(company_data['sectors']) if isinstance(company_data['sectors'], list) else "Non spécifié")
 
-# Titre du graphique
-st.subheader("Levées de fonds par mois")
-
-# Création du graphique avec Altair
-chart = (
-    alt.Chart(df)
-    .mark_bar()
-    .encode(
-        x='Mois',
-        y='Levées de fonds',
-        tooltip=['Mois', 'Levées de fonds']
-    )
-    .properties(width='container', height=300)
-)
-
-# Affichage du graphique
-st.altair_chart(chart, use_container_width=True)
+# Financements
+st.markdown("### Informations supplémentaires :")
+st.write(f"**Financement total :** {company_data['Montant'] if pd.notna(company_data['Montant']) else 'Non spécifié'}")
