@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import ast
 from prefect import flow, task
@@ -5,10 +6,9 @@ from prefect.logging import get_logger
 
 logger = get_logger("data_pipeline")
 
-
 @task
 def load_data():
-    """📥 Charge les données depuis les fichiers JSON et CSV"""
+    """📥 Charge les données depuis les fichiers JSON et CSV"""  
     logger.info("📥 Chargement des données...")
 
     df_bpi = pd.read_json(r'sources/bpifrance_startups_data2.json')
@@ -20,12 +20,13 @@ def load_data():
     df_siren = pd.read_csv(r'sources/enriched_company_data.csv')
 
     logger.info("✅ Données chargées avec succès.")
+
     return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren
 
 
 @task
 def unpack_minalogic(df_mina):
-    """🔍 Déballe les colonnes 'contact' et 'infos' dans df_mina"""
+    """🔄 Déballe les colonnes 'contact' et 'infos' dans df_mina"""
     logger.info("🔄 Déballage des données Minalogic...")
 
     def to_dict(x):
@@ -48,30 +49,30 @@ def unpack_minalogic(df_mina):
     df_mina["Type d'organisme"] = df_mina['infos'].apply(lambda d: d.get("Type d'organisme") if isinstance(d, dict) else None)
 
     logger.info("✅ Déballage terminé.")
+
     return df_mina
 
 
 @task
 def clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren):
-    """🧼 Nettoie et normalise les colonnes de tous les DataFrames"""
+    """🔄 Nettoie et normalise les DataFrames"""
     logger.info("🔄 Nettoyage et normalisation des données...")
 
-    # ✅ Liste des renommages (liste de tuples)
-    rename_mappings = [
-        (df_bpi, {'name': 'nom', 'hashtags': 'mots_cles_b', 'website': 'site_web'}),
-        (df_CESFR, {'Nom': 'nom', 'Description': 'description', 'Catégories': 'mots_cles_y', 
-                    'Website': 'site_web_z', 'Adresse': 'adresse_z', 'Logo': 'logo'}),
-        (df_maddy, {'Nom': 'nom', 'Description': 'description', 'Site internet': 'site_web', 
-                    'Logo': 'logo', 'Hashtags': 'mots_cles_z'}),
-        (df_mina, {'name': 'nom', 'Logo': 'logo'}),
-        (df_viva, {'name': 'nom', 'website': 'site_web_u', 'Logo': 'logo'})
-    ]
+    rename_mappings = {
+        'df_bpi': {'name': 'nom', 'hashtags': 'mots_cles_b', 'website': 'site_web'},
+        'df_CESFR': {'Nom': 'nom', 'Description': 'description', 'Catégories': 'mots_cles_y', 
+                     'Website': 'site_web_z', 'Adresse': 'adresse_z', 'Logo': 'logo'},
+        'df_maddy': {'Nom': 'nom', 'Description': 'description', 'Site internet': 'site_web', 
+                     'Logo': 'logo', 'Hashtags': 'mots_cles_z'},
+        'df_mina': {'name': 'nom', 'Logo': 'logo'},
+        'df_viva': {'name': 'nom', 'website': 'site_web_u', 'Logo': 'logo'}
+    }
 
-    # ✅ Appliquer les renommages
-    for df, rename_map in rename_mappings:
+    for df_name, rename_map in rename_mappings.items():
+        df = locals()[df_name]
         df.rename(columns=rename_map, inplace=True)
 
-    # ✅ Suppression des colonnes inutiles
+    # Suppression des colonnes inutiles
     def safe_drop(df, cols):
         existing_cols = [col for col in cols if col in df.columns]
         df.drop(columns=existing_cols, inplace=True, errors='ignore')
@@ -84,57 +85,65 @@ def clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren):
     safe_drop(df_viva, ["link", "looking_for", "development_level"])
     safe_drop(df_siren, ["État administratif", "Catégorie entreprise", "Denomination usuelle"])
 
-    # ✅ Mise en majuscules
+    # Mise en majuscules
     for df in [df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva]:
         if 'nom' in df.columns:
             df['nom'] = df['nom'].str.upper()
 
     logger.info("✅ Nettoyage terminé.")
+
     return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren
 
 
 @task
 def merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren):
-    """🔗 Fusionne les DataFrames et remplit les colonnes manquantes"""
+    """🔄 Fusionne les DataFrames"""
     logger.info("🔄 Fusion des DataFrames...")
 
-    # Fusion progressive
-    merged_df = pd.merge(df_bpi, df_tech, on=['nom','description','logo'], how='outer')
-    merged_df = pd.merge(merged_df, df_maddy, on=['nom','description','logo'], how='outer')
-    merged_df = pd.merge(merged_df, df_CESFR, on=['nom','description','logo'], how='outer')
-    merged_df = pd.merge(merged_df, df_mina, on=['nom','description','logo'], how='outer')
-    merged_df = pd.merge(merged_df, df_viva, on=['nom','description','logo'], how='outer')
-    merged_df = pd.merge(merged_df, df_siren, on=['nom'], how='outer')
+    merged_df = df_bpi.merge(df_tech, on=['nom','description','logo'], how='outer')\
+                      .merge(df_maddy, on=['nom','description','logo'], how='outer')\
+                      .merge(df_CESFR, on=['nom','description','logo'], how='outer')\
+                      .merge(df_mina, on=['nom','description','logo'], how='outer')\
+                      .merge(df_viva, on=['nom','description','logo'], how='outer')\
+                      .merge(df_siren, on=['nom'], how='outer')
 
     logger.info("✅ Fusion terminée.")
+
     return merged_df
 
 
 @task
 def save_data(df):
     """💾 Sauvegarde le DataFrame final en CSV"""
-    file_path = "output/merged_data.csv"
+    output_dir = "output"
+    file_path = os.path.join(output_dir, "merged_data.csv")
+
+    # ✅ Vérifier si le dossier existe, sinon le créer
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        logger.info(f"📁 Dossier {output_dir} créé.")
+
     df.to_csv(file_path, index=False)
     logger.info(f"✅ Données sauvegardées dans {file_path}")
 
 
 @flow(name="Prefect Data Pipeline")
 def data_pipeline():
-    """🚀 Orchestre le pipeline de transformation des données"""
+    """🚀 Orchestration du pipeline de transformation des données"""
     logger.info("🚀 Démarrage du pipeline Prefect...")
-
+    
     # Étape 1 : Chargement des données
     df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren = load_data()
-
+    
     # Étape 2 : Déballage de df_mina
     df_mina = unpack_minalogic(df_mina)
-
+    
     # Étape 3 : Nettoyage des DataFrames
     df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren = clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren)
-
+    
     # Étape 4 : Fusion des DataFrames
     merged_df = merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren)
-
+    
     # Étape 5 : Sauvegarde
     save_data(merged_df)
 
