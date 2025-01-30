@@ -17,10 +17,11 @@ def load_data():
     df_viva = pd.read_csv(r'sources/partners_viva_tech.csv')
     df_siren = pd.read_csv(r'sources/enriched_company_data.csv')
     df_pepites = pd.read_csv(r'sources/startup_pepites_category_website.csv')
+    df_ft = pd.read_csv(r'sources/df_french_tech.csv')
 
     logger.info("Données chargées")
 
-    return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites
+    return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft
 
 
 @task
@@ -51,7 +52,7 @@ def debal_minalogic(df_mina):
 
 
 @task
-def clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites):
+def clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft):
     """Nettoie les DataFrames"""
     rename_mappings = {
         'df_bpi': {'name': 'nom', 'hashtags': 'mots_cles_b', 'website': 'site_web'},
@@ -93,11 +94,11 @@ def clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, 
 
     logger.info("Nettoyage terminé.")
 
-    return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites
+    return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft
 
 
 @task
-def merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites):
+def merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft):
     """Fusionne les DataFrames"""
     # Fusion df_bpi et df_tech
     merged_df = pd.merge(df_bpi, df_tech, on=['nom','description','logo'], how='outer')
@@ -113,20 +114,33 @@ def merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, 
     merged_df = pd.merge(merged_df, df_siren, on=['nom'], how='outer')
     # Fusion de la merge avec df_pepites
     merged_df = pd.merge(merged_df, df_pepites, on=['nom','description','logo'], how='outer')
+    # Fusion de la merge avec df_ft
+    merged_df = pd.merge(merged_df, df_ft, on=['nom','description','logo'], how='outer')
 
     logger.info("Fusion terminée.")
 
+    # Fusion des mots clés
+    mots_cles_cols = ['mots_clé','mots_cles','mots_cles_z','mots_cles_y','mots_cles_a','mots_cles_t','mots_clé_2', 'mots_clé_3', 'mots_clé_4', 'mot_clé_5']
+    
+    # Fusionner les colonnes directement en une seule colonne "mots_cles"
+    merged_df["mots_cles"] = (
+    merged_df[mots_cles_cols]
+    .stack()
+    .groupby(level=0)
+    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+    )
+    
+    logger.info("Mots clés fusionnés")
+
     #Suppression des colonnes
+    merged_df.drop(columns=mots_cles_cols, inplace=True)
     merged_df.drop(columns=['site_web_y','site_web_z','site_web_z','site_web_u','site_web_t'], inplace=True)
-
-    merged_df.drop(columns=['mots_cles','mots_cles_z','mots_cles_y','mots_cles_a','mots_cles_t'], inplace=True)
-
     merged_df.drop(columns=['Field_1','Field_2','Field_3'], inplace=True)
-
     merged_df.drop(columns=['city_x','city_y','Adresse','Date de création_y','emplacement','fundraising','address','Denomination légale'], inplace=True)
-
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
     merged_df = merged_df.applymap(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)  # Remplacer les espaces multiples
+    
+    logger.info("Colonnes supprimées")
 
     return merged_df
 
@@ -143,13 +157,13 @@ def data_pipeline():
     """Lancement de toutes les task de netoyage"""
 
     # Chargement des données
-    df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites = load_data()
+    df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft = load_data()
     # Déballage de df_mina
     df_mina = debal_minalogic(df_mina)
     # Nettoyage des DataFrames
-    df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites = clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites)
+    df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft = clean_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft)
     # Fusion des DataFrames
-    merged_df = merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites)
+    merged_df = merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft)
     # Sauvegarde
     save_data(merged_df)
 
