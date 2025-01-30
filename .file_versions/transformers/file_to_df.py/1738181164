@@ -1,0 +1,43 @@
+if 'transformer' not in globals():
+    from mage_ai.data_preparation.decorators import transformer
+if 'test' not in globals():
+    from mage_ai.data_preparation.decorators import test
+    import pandas as pd
+
+@transformer
+def file_to_df(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, *args, **kwargs):
+    """
+    Transforme les données importées depuis S3 et retourne les DataFrames avec des noms explicites.
+
+    Args:
+        df_bpi (DataFrame): Données de bpifrance_startups_data2.json
+        df_tech (DataFrame): Données de tech_fest_data.json
+        df_maddy (DataFrame): Données de entreprises_data - maddyness.json
+        df_CESFR (DataFrame): Données de exposantsFRCES2025.csv
+        df_mina (DataFrame): Données de societes_minalogic.csv
+        df_viva (DataFrame): Données de partners_viva_tech.csv
+        df_siren (DataFrame): Données de enriched_company_data.csv
+
+    Returns:
+        Tuple contenant les DataFrames bien nommés.
+    """
+    
+    # Vérifier que chaque DataFrame est bien reçu et valide
+    df_list = [df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren]
+    df_names = ["df_bpi", "df_tech", "df_maddy", "df_CESFR", "df_mina", "df_viva", "df_siren"]
+
+    for i, df in enumerate(df_list):
+        if df is None or not isinstance(df, pd.DataFrame):
+            raise ValueError(f"⚠️ Erreur: {df_names[i]} est invalide ou manquant.")
+
+    return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren
+
+@test
+def test_output(output, *args) -> None:
+    """
+    Vérifie que les DataFrames sont bien retournés.
+    """
+    assert output is not None, "⚠️ L'output est vide."
+    assert isinstance(output, tuple), "⚠️ L'output doit être un tuple contenant les DataFrames."
+    assert len(output) == 7, f"⚠️ L'output doit contenir 7 DataFrames, mais il en contient {len(output)}."
+    assert all(isinstance(df, pd.DataFrame) for df in output), "⚠️ Tous les éléments de l'output doivent être des DataFrames."

@@ -1,0 +1,8 @@
+mage-ai         # Notre ETL préféré.
+python-dotenv   # Pour lire nos variables d'environnement depuis le fichier .env.
+sshtunnel       # Création de tunnels SSH pour accéder de manière sécurisée à des services qui ne sont pas directement exposés sur le réseau.
+psycopg2-binary # Un adaptateur Python pour PostgreSQL.
+pandas          # Pour le traitement de nos données dans notre pipeline.
+datetime        # Toujours pratique pour formater et effectuer des calculs avec des objets date et heure.
+botocore        # Interactions avec les services AWS.
+dask[dataframe] # Permet de manipuler de grands ensembles de données avec des DataFrames, avec des performances optimisées pour le traitement parallèle.
