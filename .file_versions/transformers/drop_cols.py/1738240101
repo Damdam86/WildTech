@@ -1,0 +1,40 @@
+if 'transformer' not in globals():
+    from mage_ai.data_preparation.decorators import transformer
+if 'test' not in globals():
+    from mage_ai.data_preparation.decorators import test
+
+
+@transformer
+def drop_cols(rename_cols_output, df_siren, df_tech):
+    """
+    Supprime des colonnes spécifiques des DataFrames.
+    """
+    df_bpi = rename_cols_output["df_bpi"]
+    df_CESFR = rename_cols_output["df_CESFR"]
+    print(df_CESFR.columns)
+    df_maddy = rename_cols_output["df_maddy"]
+    print(df_CESFR.columns)
+df_mina = rename_cols_output["df_mina"]
+    df_viva = rename_cols_output["df_viva"]
+
+    df_tech.drop(columns=['social_links'], inplace=True)
+    df_bpi.drop(columns=['total_funding'], inplace=True)
+    df_CESFR.drop(columns=['Lien'], inplace=True)
+    df_maddy.drop(columns=['Siège', 'Date de création'], inplace=True)
+    df_mina.drop(columns=['url', "Date d'adhésion", "contact", "infos"], inplace=True)
+    df_viva.drop(columns=["link", "looking_for", "development_level"], inplace=True)
+    df_siren.drop(columns=["État administratif", "Catégorie entreprise", "Denomination usuelle"], inplace=True)
+
+    return {
+            "df_bpi": df_bpi,
+            "df_CESFR": df_CESFR,
+            "df_maddy": df_maddy,
+            "df_mina": df_mina,
+            "df_viva": df_viva
+        }
+@test
+def test_output(output, *args) -> None:
+    """
+    Template code for testing the output of the block.
+    """
+    assert output is not None, 'The output is undefined'

@@ -1,0 +1,65 @@
+from mage_ai.io.s3 import S3
+from mage_ai.data_preparation.shared.secrets import get_secret_value
+from pandas import DataFrame
+
+if 'data_loader' not in globals():
+    from mage_ai.data_preparation.decorators import data_loader
+
+
+@data_loader
+def load_from_s3_bucket(**kwargs) -> DataFrame:
+    # 🔥 Récupération des credentials depuis Mage-AI Secrets
+    AWS_ACCESS_KEY_ID = get_secret_value("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = get_secret_value("AWS_SECRET_ACCESS_KEY")
+    AWS_REGION = get_secret_value("AWS_REGION")
+    bucket_name = get_secret_value("BUCKET_NAME")  # Assure-toi d'avoir ajouté ce secret dans Mage-AI
+
+    print("🔍 Mage-AI charge la configuration suivante :")
+    print("🔑 AWS_ACCESS_KEY_ID:", AWS_ACCESS_KEY_ID)
+    print("🔑 AWS_SECRET_ACCESS_KEY:", AWS_SECRET_ACCESS_KEY)
+    print("🌍 AWS_REGION:", AWS_REGION)
+    print("🪣 Bucket Name:", bucket_name)
+
+    object_key = "societes_minalogic.csv"
+
+    df_mina = S3(
+        aws_access_key_id=aws_access_key,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        aws_region=AWS_REGION
+    ).load(
+        bucket_name,
+        object_key,
+        format="csv",
+        delimiter=","
+    )
+
+    return df_mina
+
+
+
+from mage_ai.settings.repo import get_repo_path
+from mage_ai.io.config import ConfigFileLoader
+from mage_ai.io.s3 import S3
+from os import path
+from pandas import DataFrame
+
+if 'data_loader' not in globals():
+    from mage_ai.data_preparation.decorators import data_loader
+
+
+@data_loader
+def load_from_s3_bucket(**kwargs) -> DataFrame:
+    config_path = path.join(get_repo_path(), 'io_config.yaml')
+    config_profile = 'default'
+
+    bucket_name = 'wildstartech'  # Change to your bucket name
+    object_key = 'exposantsFRCES2025.csv'   # Change to your object key
+
+    df_CESFR = S3.with_config(ConfigFileLoader(config_path, config_profile)).load(
+        bucket_name,
+        object_key,
+        format='csv',
+        delimiter=';'  
+    )
+    return df_CESFR
+#https://docs.mage.ai/integrations/databases/S3

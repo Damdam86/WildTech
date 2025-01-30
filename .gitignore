@@ -1,4 +1,3 @@
 # Empêcher io_config.yaml d'être suivi par Git
 io_config.yaml
-
 .env
