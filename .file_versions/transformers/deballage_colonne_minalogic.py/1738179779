@@ -1,0 +1,38 @@
+if 'transformer' not in globals():
+    from mage_ai.data_preparation.decorators import transformer
+if 'test' not in globals():
+    from mage_ai.data_preparation.decorators import test
+    import ast
+
+@transformer
+def transform(data, *args, **kwargs):
+    """
+    Template code for a transformer block.
+
+    Add more parameters to this function if this block has multiple parent blocks.
+    There should be one parameter for each output variable from each parent block.
+
+    Args:
+        data: The output from the upstream parent block
+        args: The output from any additional upstream blocks (if applicable)
+
+    Returns:
+        Anything (e.g. data frame, dictionary, array, int, str, etc.)
+    """
+    # Débalage des colonnes
+    df_bpi = pd.read_json(r'bpifrance_startups_data2.json')
+    df_tech = pd.read_json(r"tech_fest_data.json")
+    df_maddy = pd.read_json(r"entreprises_data - maddyness.json")
+    df_CESFR = pd.read_csv(r"exposantsFRCES2025.csv")
+    df_mina = pd.read_csv(r'societes_minalogic.csv')
+    df_viva = pd.read_csv(r'partners_viva_tech.csv')
+    df_siren = pd.read_csv(r'enriched_company_data.csv')
+    return df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren
+
+
+@test
+def test_output(output, *args) -> None:
+    """
+    Template code for testing the output of the block.
+    """
+    assert output is not None, 'The output is undefined'
