@@ -13,13 +13,14 @@ def load_from_s3_bucket(**kwargs) -> DataFrame:
     config_path = path.join(get_repo_path(), 'io_config.yaml')
     config_profile = 'default'
 
-    bucket_name = 'wildstartech' 
-    object_key = 'entreprises_data - maddyness.json'  
+    bucket_name = 'wildstartech'  # Change to your bucket name
+    object_key = 'exposantsFRCES2025.csv'   # Change to your object key
 
-    df_maddy = S3.with_config(ConfigFileLoader(config_path, config_profile)).load(
+    df_CESFR  S3.with_config(ConfigFileLoader(config_path, config_profile)).load(
         bucket_name,
         object_key,
-        format='json'
+        format='csv',
+        delimiter=';'  
     )
-    
-    return df_maddy
+    return 
+#https://docs.mage.ai/integrations/databases/S3

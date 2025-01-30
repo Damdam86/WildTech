@@ -187,7 +187,7 @@ blocks:
   language: python
   name: maj_name
   retry_config: null
-  status: updated
+  status: not_executed
   timeout: null
   type: transformer
   upstream_blocks:

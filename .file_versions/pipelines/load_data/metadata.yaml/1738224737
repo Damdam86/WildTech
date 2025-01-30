@@ -161,8 +161,7 @@ blocks:
 - all_upstream_blocks_executed: false
   color: null
   configuration: {}
-  downstream_blocks:
-  - maj_name
+  downstream_blocks: []
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -177,22 +176,6 @@ blocks:
   - load_siren
   - load_techfest24
   uuid: drop_cols
-- all_upstream_blocks_executed: false
-  color: null
-  configuration: {}
-  downstream_blocks: []
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: python
-  name: maj_name
-  retry_config: null
-  status: updated
-  timeout: null
-  type: transformer
-  upstream_blocks:
-  - drop_cols
-  uuid: maj_name
 cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}

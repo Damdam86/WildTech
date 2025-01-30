@@ -57,7 +57,7 @@ blocks:
     file_source:
       path: data_loaders\load_siren.py
   downstream_blocks:
-  - drop_cols
+  - rename_cols
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -89,7 +89,7 @@ blocks:
   color: null
   configuration: {}
   downstream_blocks:
-  - drop_cols
+  - rename_cols
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -140,8 +140,7 @@ blocks:
 - all_upstream_blocks_executed: false
   color: null
   configuration: {}
-  downstream_blocks:
-  - drop_cols
+  downstream_blocks: []
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -154,45 +153,12 @@ blocks:
   upstream_blocks:
   - deballage_mina
   - load_vivatech24
+  - load_siren
   - load_bpi
+  - load_techfest24
   - load_maddyness
   - load_exposantces25
   uuid: rename_cols
-- all_upstream_blocks_executed: false
-  color: null
-  configuration: {}
-  downstream_blocks:
-  - maj_name
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: python
-  name: drop_cols
-  retry_config: null
-  status: updated
-  timeout: null
-  type: transformer
-  upstream_blocks:
-  - rename_cols
-  - load_siren
-  - load_techfest24
-  uuid: drop_cols
-- all_upstream_blocks_executed: false
-  color: null
-  configuration: {}
-  downstream_blocks: []
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: python
-  name: maj_name
-  retry_config: null
-  status: updated
-  timeout: null
-  type: transformer
-  upstream_blocks:
-  - drop_cols
-  uuid: maj_name
 cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}
