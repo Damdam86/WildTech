@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import ast
 from prefect import flow, task
 from prefect.logging import get_logger
@@ -19,8 +20,6 @@ def load_data():
     df_pepites = pd.read_csv(r'sources/startup_pepites_category_website.csv')
     df_ft = pd.read_csv(r'sources/df_french_tech.csv')
     df_keywords = pd.read_csv(r'sources/add_mot_cles.csv')
-
-
 
     logger.info("Données chargées")
 
@@ -158,6 +157,16 @@ def cleaning_data2(merged_df):
     
     logger.info("Mots clés fusionnés")
 
+    # Fusion des effectifs
+    effectifs_cols = ['Tranche effectifs', 'employees']
+    merged_df["Effectif_def"] = (
+    merged_df[effectifs_cols]
+    .stack()
+    .groupby(level=0)
+    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+    )
+    logger.info("Effectifs fusionnés")
+
     # Fusion des sites internet
     site_web_cols = ['site_web', 'site_web_x','site_web_y','site_web_z','site_web_z','site_web_u','site_web_t']
     merged_df["site_web_def"] = (
@@ -208,6 +217,7 @@ def cleaning_data2(merged_df):
     merged_df.drop(columns=site_web_cols, inplace=True)
     merged_df.drop(columns=adresse_cols, inplace=True)
     merged_df.drop(columns=creation_cols, inplace=True)
+    merged_df.drop(columns=effectifs_cols, inplace=True)
     merged_df.drop(columns=['Field_1','Field_2','Field_3','tags','page_french_tech'], inplace=True)
     merged_df.drop(columns=['emplacement','fundraising','Denomination légale'], inplace=True)
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
@@ -215,7 +225,110 @@ def cleaning_data2(merged_df):
     
     logger.info("Colonnes supprimées")
 
+    # Fonction de nettoyage adaptée pour gérer à la fois les chaînes et les listes
+    def clean_mots_cles(s):
+        if isinstance(s, list):
+            tokens = [str(token).strip() for token in s if str(token).strip() != ""]
+            tokens = [str(token).strip() for token in s if str(token).strip() != "#"]
+
+        elif isinstance(s, str):
+            tokens = s.split(",")
+            tokens = [token.strip() for token in tokens if token.strip() != ""]
+            tokens = [token.strip() for token in tokens if token.strip() != '#']
+
+        else:
+            tokens = []
+        return ", ".join(tokens)
+
+    # Application de la fonction sur la colonne "mots_cles_def"
+    merged_df['mots_cles_def'] = merged_df['mots_cles_def'].apply(clean_mots_cles)
+        
+    # Fonction pour extraire la date d'une cellule
+    def extract_date(cell):
+        # Si la cellule est une liste, on renvoie son premier élément
+        if isinstance(cell, list):
+            if len(cell) > 0:
+                return cell[0]
+            else:
+                return None
+        # Si la cellule est une chaîne qui ressemble à une liste, on tente de la convertir
+        if isinstance(cell, str) and cell.startswith('[') and cell.endswith(']'):
+            try:
+                cell_list = ast.literal_eval(cell)
+                if isinstance(cell_list, list) and len(cell_list) > 0:
+                    return cell_list[0]
+            except Exception as e:
+                pass
+        return cell
+
+    # Netoyyage de 'date_creation_def'
+    merged_df['date_creation_def'] = merged_df['date_creation_def'].apply(extract_date)
+    # Conversion en datetime
+    merged_df['date_creation_def'] = pd.to_datetime(merged_df['date_creation_def'], format='%Y-%m-%d', errors='coerce') # errors='coerce' convertit les valeurs incorrectes en NaT
+    # On ne recupère que l'année
+    #merged_df['date_creation_def'] = merged_df['date_creation_def'].dt.year
+
+    # Netoyyage de 'Date dernier financement'
+    merged_df['Date dernier financement'] = pd.to_datetime(merged_df['Date dernier financement'], format='%d.%m.%y')
+
     return merged_df
+
+@task
+def to_missing(df):
+    """Applique la transformation à toutes les cellules pour remplacer certaines valeurs par missing (np.nan)"""
+    def missing_value(x):
+        if x is None:
+            return np.nan
+        if isinstance(x, str):
+            if x.strip().lower() in ["non disponible", "site web non disponible", "description non disponible", "none"]:
+                return np.nan
+            return x
+        if isinstance(x, list):
+            cleaned = [str(item).strip().lower() for item in x if item is not None]
+            if not cleaned or all(val in ["non disponible", "site web non disponible", "description non disponible", "none"] for val in cleaned):
+                return np.nan
+            return x
+        return x
+    return df.applymap(missing_value)
+
+
+@task
+def clean_effectif(merged_df):
+    # Converti les différentes valeurs dans effectifs
+    dictio_effectif = {
+    0: '0 salarié',
+    1: '1 ou 2 salariés',
+    2: '3 à 5 salariés',
+    3: '6 à 9 salariés',
+    11: '10 à 19 salariés',
+    12: '20 à 49 salariés',
+    21: '50 à 99 salariés',
+    22: '100 à 199 salariés',
+    31: '200 à 499 salariés',
+    41: '500 à 999 salariés',
+    42: '1000 à 1999 salariés',
+    51: '2000 à 4999 salariés',
+    52: '5000 salariés ou plus'
+}
+    def simple_map(cell):
+        # Si la cellule est une liste, on prend le premier élément
+        if isinstance(cell, list):
+            cell = cell[0]
+        # Tente de convertir la valeur en entier
+        try:
+            key = int(cell)
+        except Exception:
+            return cell  # Si la conversion échoue, on renvoie la valeur telle quelle
+        # Si le key est présent dans le dictionnaire, on renvoie la valeur correspondante
+        if key in dictio_effectif:
+            return dictio_effectif[key]
+        else:
+            return cell
+    
+    merged_df['Effectif_def'] = merged_df['Effectif_def'].apply(simple_map)
+    
+    return merged_df
+
 
 @task
 def save_data(df):
@@ -231,8 +344,8 @@ def create_database(merged_df):
         return tuple(x) if isinstance(x, list) else x
     
     cols_to_convert = ['description', 'logo', "Type d'organisme", 'SIREN',
-                       'Activité principale', 'Tranche effectifs', 'market',
-                       'employees', 'mots_cles_def', 'site_web_def', 'adresse_def',
+                       'Activité principale', 'Effectif_def', 'market',
+                    'mots_cles_def', 'site_web_def', 'adresse_def',
                        'date_creation_def']
     for col in cols_to_convert:
         if col in merged_df.columns:
@@ -240,8 +353,8 @@ def create_database(merged_df):
     
     # Table société avec créaton ID
     societes = merged_df[['nom', 'description', 'logo', "Type d'organisme", 'SIREN', 
-                            'Activité principale', 'Tranche effectifs', 'market', 
-                            'employees', 'mots_cles_def', 'site_web_def', 'adresse_def', 
+                            'Activité principale', 'Effectif_def', 'market', 
+                            'mots_cles_def', 'site_web_def', 'adresse_def', 
                             'date_creation_def']].drop_duplicates()
     societes.insert(0, "entreprise_id", range(1, len(societes) + 1))
     
@@ -266,9 +379,6 @@ def create_database(merged_df):
     
     logger.info("Les trois datasets ont été créés.")
 
-# Exemple d'appel de la fonction :
-# create_database(merged_df)
-
 
 @flow
 def data_pipeline():
@@ -284,10 +394,15 @@ def data_pipeline():
     merged_df = merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft, df_keywords)
     # Nettoyage des DataFrames 2
     merged_df = cleaning_data2(merged_df)
+    # Suppression des valeurs nul / etc. 
+    merged_df = to_missing(merged_df)
+    # Standardisation des effectifs 
+    merged_df  = clean_effectif(merged_df)
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
     create_database(merged_df)
+
 
 if __name__ == "__main__":
     data_pipeline()
