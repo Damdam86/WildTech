@@ -147,7 +147,7 @@ def cleaning_data2(merged_df):
     """Nettoie les DataFrames aprés merge"""
 
     # Fusion des mots clés
-    mots_cles_cols = ['mots_cles_z','mots_cles_x','mots_cles_y','mots_cles_a','product_types','sectors','mots_cles_b','mots_cles_t','mots_cles_ft','Marché']
+    mots_cles_cols = ['mots_cles_z','mots_cles_x','mots_cles_y','mots_cles_a','product_types','sectors','mots_cles_b','mots_cles_t','mots_cles_ft','Marché','Field_1','Field_2','Field_3']
     merged_df["mots_cles_def"] = (
     merged_df[mots_cles_cols]
     .stack()
@@ -376,6 +376,7 @@ def split_contact(merged_df):
     
     # Applique la fonction sur la colonne 'Contact'
     merged_df[['Nom', 'Prenom', 'Poste']] = merged_df['Contact'].apply(split_contact_row)
+    merged_df.drop(columns=['Contact'], inplace=True)
     return merged_df
 
 
