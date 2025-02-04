@@ -1,7 +1,7 @@
 from dash import Dash, html, dcc, Output, Input
 import dash_bootstrap_components as dbc
 import pandas as pd
-from app import app
+from dash import callback
 
 # Chargement des données
 df = pd.read_csv('assets/societes.csv')
@@ -42,7 +42,7 @@ layout = dbc.Container([
 ], fluid=True)
 
 # Callback pour mettre à jour les informations de la startup sélectionnée
-@app.callback(
+@callback(
     Output("startup-info", "children"),
     Input("df-dropdown", "value")
 )
