@@ -382,11 +382,11 @@ def split_contact(merged_df):
 def fil_type_organisme(merged_df):
 
 
-@task
-def save_data(df):
+#@task
+#def save_data(df):
     """Sauvegarde la merged_df en CSV"""
-    df.to_csv('merged_df.csv', index=False)
-    logger.info(f"Données sauvegardées")
+    #df.to_csv('merged_df.csv', index=False)
+    #logger.info(f"Données sauvegardées")
 
 @task
 def create_database(merged_df):

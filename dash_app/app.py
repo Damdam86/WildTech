@@ -2,7 +2,7 @@ import dash
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-from pages import home, dashboard  # Importer les pages
+from pages import home, dashboard, projet  # Importer les pages
 
 # Initialisation de l'application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG], suppress_callback_exceptions=True)
@@ -15,7 +15,8 @@ navbar = dbc.NavbarSimple(
     dark=True,
     children=[
         dbc.NavItem(dbc.NavLink("Accueil", href="/home")),
-        dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard"))
+        dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
+        dbc.NavItem(dbc.NavLink("Projet", href="/projet"))
     ])
 
 # Layout
@@ -33,6 +34,8 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/dashboard':
         return dashboard.layout
+    elif pathname == '/projet':
+        return projet.layout
     else:
         return home.layout
 
