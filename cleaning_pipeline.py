@@ -18,7 +18,7 @@ def load_data():
     df_viva = pd.read_csv(r'sources/partners_viva_tech.csv')
     df_siren = pd.read_csv(r'sources/enriched_company_data.csv')
     df_pepites = pd.read_csv(r'sources/startup_pepites_category_website.csv')
-    df_ft = pd.read_csv(r'sources/df_french_tech.csv')
+    df_ft = pd.read_csv(r'sources/frechtech full.csv')
     df_keywords = pd.read_csv(r'sources/add_mot_cles.csv')
 
     logger.info("Données chargées")
@@ -90,7 +90,7 @@ def cleaning_data1(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_sir
     logger.info("Suppréssion terminée")
 
     # Mise en majuscules des noms des sociétés
-    for df in [df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_pepites]:
+    for df in [df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_pepites, df_ft]:
         if 'nom' in df.columns:
             df['nom'] = df['nom'].str.upper()
 
@@ -147,7 +147,7 @@ def cleaning_data2(merged_df):
     """Nettoie les DataFrames aprés merge"""
 
     # Fusion des mots clés
-    mots_cles_cols = ['mots_clé','mots_cles_z','mots_cles_x','mots_cles_y','mots_cles_a','field','product_types','sectors','mots_cles_b','mots_cles_t','mots_clé_2', 'mots_clé_3', 'mots_clé_4', 'mot_clé_5','Marché']
+    mots_cles_cols = ['mots_cles_z','mots_cles_x','mots_cles_y','mots_cles_a','product_types','sectors','mots_cles_b','mots_cles_t','mots_cles_ft','Marché']
     merged_df["mots_cles_def"] = (
     merged_df[mots_cles_cols]
     .stack()
@@ -218,8 +218,7 @@ def cleaning_data2(merged_df):
     merged_df.drop(columns=adresse_cols, inplace=True)
     merged_df.drop(columns=creation_cols, inplace=True)
     merged_df.drop(columns=effectifs_cols, inplace=True)
-    merged_df.drop(columns=['Field_1','Field_2','Field_3','tags','page_french_tech'], inplace=True)
-    merged_df.drop(columns=['emplacement','fundraising','Denomination légale'], inplace=True)
+    merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags'], inplace=True)
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
     merged_df = merged_df.applymap(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)  # Remplacer les espaces multiples
     
@@ -260,6 +259,9 @@ def cleaning_data2(merged_df):
             except Exception as e:
                 pass
         return cell
+    
+    logger.info("Mots clés nettoyés")
+
 
     # Netoyyage de 'date_creation_def'
     merged_df['date_creation_def'] = merged_df['date_creation_def'].apply(extract_date)
@@ -273,6 +275,9 @@ def cleaning_data2(merged_df):
 
     return merged_df
 
+logger.info("Dates nettoyés")
+
+
 @task
 def to_missing(df):
     """Applique la transformation à toutes les cellules pour remplacer certaines valeurs par missing (np.nan)"""
@@ -280,12 +285,12 @@ def to_missing(df):
         if x is None:
             return np.nan
         if isinstance(x, str):
-            if x.strip().lower() in ["non disponible", "site web non disponible", "description non disponible", "none"]:
+            if x.strip().lower() in ["non disponible", "site web non disponible", "description non disponible", "none", "Catégorie non disponible"]:
                 return np.nan
             return x
         if isinstance(x, list):
             cleaned = [str(item).strip().lower() for item in x if item is not None]
-            if not cleaned or all(val in ["non disponible", "site web non disponible", "description non disponible", "none"] for val in cleaned):
+            if not cleaned or all(val in ["non disponible", "site web non disponible", "description non disponible", "none" ,"Catégorie non disponible"] for val in cleaned):
                 return np.nan
             return x
         return x
@@ -294,7 +299,7 @@ def to_missing(df):
 
 @task
 def clean_effectif(merged_df):
-    # Converti les différentes valeurs dans effectifs
+    # Converti les différentes valeurs dans effectifs https://entreprise.api.gouv.fr/catalogue/insee/etablissements
     dictio_effectif = {
     0: '0 salarié',
     1: '1 ou 2 salariés',
@@ -305,28 +310,72 @@ def clean_effectif(merged_df):
     21: '50 à 99 salariés',
     22: '100 à 199 salariés',
     31: '200 à 499 salariés',
+    32: '250 à 499 salariés',
     41: '500 à 999 salariés',
     42: '1000 à 1999 salariés',
     51: '2000 à 4999 salariés',
-    52: '5000 salariés ou plus'
+    52: '5000 salariés ou plus',
+    53: '10 000 salariés et plus',
+    '-': np.nan,
+    '2-10 employees': '3 à 5 salariés',
+    '11-50 employees': '20 à 49 salariés',
+    '51-200 employees': '50 à 99 salariés',
+    '201-500 employees': '200 à 499 salariés',
+    '1 employees': '1 ou 2 salariés',
+    '501-1000 employees': '500 à 999 salariés',
+    '1001-5000 employees': '1000 à 1999 salariés',
+    '10001+ employees': '5000 salariés ou plus',
+    '5001-10000 employees': '5000 salariés ou plus',
+    'NN': 'Effectif inconnu'
 }
     def simple_map(cell):
         # Si la cellule est une liste, on prend le premier élément
         if isinstance(cell, list):
             cell = cell[0]
-        # Tente de convertir la valeur en entier
+        # Tente de convertir la valeur en entier et applique le mapping si possible
         try:
             key = int(cell)
+            if key in dictio_effectif:
+                return dictio_effectif[key]
         except Exception:
-            return cell  # Si la conversion échoue, on renvoie la valeur telle quelle
-        # Si le key est présent dans le dictionnaire, on renvoie la valeur correspondante
-        if key in dictio_effectif:
-            return dictio_effectif[key]
-        else:
-            return cell
+            # Si la conversion échoue, on vérifie si la valeur (en tant que chaîne) est présente dans le dictionnaire
+            if cell in dictio_effectif:
+                return dictio_effectif[cell]
+        # Retourne la valeur originale si aucun mapping n'a été trouvé
+        return cell
     
     merged_df['Effectif_def'] = merged_df['Effectif_def'].apply(simple_map)
     
+    logger.info("Effectifs nettoyés")
+
+    return merged_df
+
+
+@task
+@task
+def split_contact(merged_df):
+    def split_contact_row(contact):
+        # Vérifie si contact est une chaîne valide
+        if not isinstance(contact, str) or pd.isna(contact):
+            # Vous pouvez retourner des valeurs par défaut (par exemple, des chaînes vides)
+            return pd.Series({'Nom': '', 'Prenom': '', 'Poste': ''})
+        
+        # Sépare la chaîne en mots
+        parts = contact.split()
+        if len(parts) >= 2:
+            nom = parts[0].upper()  # le nom en majuscules
+            prenom = parts[1]
+            # Tous les mots à partir du troisième vont dans 'Poste'
+            poste = " ".join(parts[2:]) if len(parts) > 2 else ''
+        else:
+            # Si la chaîne ne comporte pas au moins deux mots
+            nom = contact.upper()
+            prenom = ''
+            poste = ''
+        return pd.Series({'Nom': nom, 'Prenom': prenom, 'Poste': poste})
+    
+    # Applique la fonction sur la colonne 'Contact'
+    merged_df[['Nom', 'Prenom', 'Poste']] = merged_df['Contact'].apply(split_contact_row)
     return merged_df
 
 
@@ -359,9 +408,9 @@ def create_database(merged_df):
     societes.insert(0, "entreprise_id", range(1, len(societes) + 1))
     
     # Table des Personnes avec entreprise_id et création contact_id
-    personnes = merged_df[['nom', 'Contact']].drop_duplicates()
+    personnes = merged_df[['nom', 'Nom', 'Prenom', 'Poste']].drop_duplicates()
     personnes = personnes.merge(societes[['nom', 'entreprise_id']], on='nom', how='left')
-    personnes = personnes[['entreprise_id', 'Contact']]
+    personnes = personnes[['entreprise_id', 'Nom', 'Prenom', 'Poste']]
     personnes.insert(0, "contact_id", range(1, len(personnes) + 1))
     
     # Table des Financements avec entreprise_id et création de financement_id
@@ -398,6 +447,8 @@ def data_pipeline():
     merged_df = to_missing(merged_df)
     # Standardisation des effectifs 
     merged_df  = clean_effectif(merged_df)
+    # Création des colonnes contacts 
+    merged_df = split_contact(merged_df)
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
