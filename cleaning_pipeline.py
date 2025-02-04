@@ -352,7 +352,6 @@ def clean_effectif(merged_df):
 
 
 @task
-@task
 def split_contact(merged_df):
     def split_contact_row(contact):
         # Vérifie si contact est une chaîne valide
@@ -378,6 +377,9 @@ def split_contact(merged_df):
     merged_df[['Nom', 'Prenom', 'Poste']] = merged_df['Contact'].apply(split_contact_row)
     merged_df.drop(columns=['Contact'], inplace=True)
     return merged_df
+
+@task
+def fil_type_organisme(merged_df):
 
 
 @task
