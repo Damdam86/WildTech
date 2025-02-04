@@ -57,7 +57,7 @@ def update_startup_info(selected_startup):
             dbc.CardBody([
                 html.Img(src=startup_data["logo"], style={"width": "150px", "margin": "0 auto", "display": "block"}),
                 html.H3(startup_data["nom"], className="text-center mt-3"),
-                html.P(f"Année de création: {startup_data['date_creation_def']}", className="text-center"),
+                html.P(f"Date de création: {startup_data['date_creation_def']}", className="text-center"),
                 html.P(f"Effectifs: {startup_data['Effectif_def']}", className="text-center"),
                 html.P(f"Type d'organisme: {startup_data["Type d'organisme"]}, {startup_data["market"]}", className="text-center"),
                 html.P(startup_data['mots_cles_def'], className="text-center")
