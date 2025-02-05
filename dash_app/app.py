@@ -22,7 +22,6 @@ def query_all_data():
     for file in files:
         df = pd.read_csv(f'assets/{file}')
         dataframes[file] = df.to_json(date_format='iso', orient='split')  # Stockage JSON
-
     return dataframes  # Retourne un dictionnaire JSON
 
 def get_dataframe(filename):
