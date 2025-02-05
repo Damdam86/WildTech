@@ -2,11 +2,13 @@ from dash import Dash, html, dcc, Output, Input
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import callback
+from app import get_dataframe  # Importer app et la fonction get_dataframe
+
 
 # Chargement des données
-df = pd.read_csv('assets/societes.csv')
-df_financement = pd.read_csv('assets/financements.csv')
-df_personne = pd.read_csv('assets/personnes.csv')
+df = get_dataframe('societes.csv')
+df_financement = get_dataframe('financements.csv')
+df_personne = get_dataframe('personnes.csv')
 
 layout = dbc.Container([
 
