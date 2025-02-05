@@ -21,6 +21,15 @@ layout = dbc.Container([
     * Les médias sociaux et le marketing digital
     * La musique ou le cinéma
     * Les jeux vidéo et le gaming … ou tout autre domaine qui vous intéresse, vous pourrez orienter votre projet dans cette direction !'''),
-    html.H6("Bien sûr, pour que tout le monde puisse avancer ensemble et s’entraider, on suivra les mêmes étapes et la même structure de projet. Vous devez respecter le workflow suivant : collecter des données, les transformer, les analyser et créer des tableaux de bord visuels, vous êtes des DATA-Analystes maintenant, vous savez de quoi on parle. Et pour rendre tout ça encore plus intéressant, on utilisera même l’IA pour enrichir vos analyses !L’idée est simple : vous êtes libre de laisser parler votre créativité sur le QUOI, pendant qu’on vous guide sur le COMMENT. Que vous visiez un projet purment professionnel ou qui joint le personnel, c’est l’occasion de développer des compétences concrètes sur un sujet qui vous tient à cœur ! 🚀", className="text-left my-4")
+    html.H6("Bien sûr, pour que tout le monde puisse avancer ensemble et s’entraider, on suivra les mêmes étapes et la même structure de projet. Vous devez respecter le workflow suivant : collecter des données, les transformer, les analyser et créer des tableaux de bord visuels, vous êtes des DATA-Analystes maintenant, vous savez de quoi on parle. Et pour rendre tout ça encore plus intéressant, on utilisera même l’IA pour enrichir vos analyses !L’idée est simple : vous êtes libre de laisser parler votre créativité sur le QUOI, pendant qu’on vous guide sur le COMMENT. Que vous visiez un projet purment professionnel ou qui joint le personnel, c’est l’occasion de développer des compétences concrètes sur un sujet qui vous tient à cœur ! 🚀", className="text-left my-4"),
 
- ], fluid=True)
+    html.H6("Les étapes du projet: "),
+    dcc.Markdown('''
+    * 1 .Acquisition des Données
+    * 2 .Traitement et Nettoyage
+    * 3 .Infrastructure de Données
+    * 4 .Visualisation
+    * 5 .Interface Utilisateur
+    * 6 .Enrichissement IA (optionnel)''')
+
+], fluid=True)
