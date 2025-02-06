@@ -29,7 +29,7 @@ def get_dataframe(filename):
     json_string = dataframes[filename]  # Récupère la chaîne JSON
     return pd.read_json(StringIO(json_string), orient='split')  # Convertit en DataFrame en utilisant StringIO pour le FutureWarning
 
-from pages import home, dashboard, projet, dashboard2 # Importer les pages
+from pages import home, projet, dashboard2 # Importer les pages
 
 # Barre de navigation
 navbar = dbc.NavbarSimple(
@@ -39,9 +39,8 @@ navbar = dbc.NavbarSimple(
     dark=True,
     children=[
         dbc.NavItem(dbc.NavLink("Accueil", href="/home")),
-        dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
-        dbc.NavItem(dbc.NavLink("Projet", href="/projet")),
-        dbc.NavItem(dbc.NavLink("Dashboard2", href="/dashboard2"))
+        dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard2")),
+        dbc.NavItem(dbc.NavLink("Projet", href="/projet"))
     ])
 
 # Layout
@@ -57,12 +56,10 @@ app.layout = html.Div([
     [Input('url', 'pathname')]
 )
 def display_page(pathname):
-    if pathname == '/dashboard':
-        return dashboard.layout
+    if pathname == '/dashboard2':
+        return dashboard2.layout
     elif pathname == '/projet':
         return projet.layout
-    elif pathname == '/dashboard2':
-        return dashboard2.layout
     else:
         return home.layout
 
@@ -75,8 +72,6 @@ def update_total_startups(_):
     total_funding = df_financement['Montant_def'].sum() 
 
     return f"{total_funding:,.0f} €"  # ✅ Formatage avec séparateur de milliers
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -1,3 +1,6 @@
 # Empêcher io_config.yaml d'être suivi par Git
 io_config.yaml
 .env
+# Ignorer les fichiers de cache
+dash_app/cache-directory/
+**/__pycache__/
