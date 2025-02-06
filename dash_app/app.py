@@ -39,8 +39,8 @@ navbar = dbc.NavbarSimple(
     dark=True,
     children=[
         dbc.NavItem(dbc.NavLink("Accueil", href="/home")),
-        dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard2")),
-        dbc.NavItem(dbc.NavLink("Projet", href="/projet"))
+        dbc.NavItem(dbc.NavLink("Projet", href="/projet")),
+        dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard2"))    
     ])
 
 # Layout
