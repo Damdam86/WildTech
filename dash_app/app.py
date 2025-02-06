@@ -69,7 +69,7 @@ def display_page(pathname):
 )
 def update_total_startups(_):
     df_financement = get_dataframe("financements.csv")  
-    total_funding = df_financement['Montant_def'].sum() 
+    total_funding = df_financement['Montant_def'].fillna(0).sum()
 
     return f"{total_funding:,.0f} €"  # ✅ Formatage avec séparateur de milliers
 

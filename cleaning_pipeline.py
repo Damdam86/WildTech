@@ -175,6 +175,7 @@ def cleaning_data2(merged_df):
     .groupby(level=0)
     .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
+    merged_df["site_web_def"] = merged_df["site_web_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
     logger.info("Site web fusionnés")
 
     # Fusion des adresses
@@ -187,15 +188,6 @@ def cleaning_data2(merged_df):
     )
     logger.info("Adresses fusionnés")
 
-    # Fusion des financements
-    #financement_cols = ['Montant', 'financement']
-    #merged_df["Montant_def"] = (
-    #merged_df[financement_cols]
-    #.stack()
-    #.groupby(level=0)
-    #.agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
-    
-    #logger.info("Financement fusionnés")
     
     # Fusion des dates de création
     creation_cols = ['Date de création_x', 'date de création','Date de création_y']
@@ -229,7 +221,7 @@ def cleaning_data2(merged_df):
     merged_df.drop(columns=adresse_cols, inplace=True)
     merged_df.drop(columns=creation_cols, inplace=True)
     merged_df.drop(columns=effectifs_cols, inplace=True)
-    merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags'], inplace=True)
+    merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags','dernier_financement'], inplace=True)
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
     merged_df = merged_df.applymap(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)  # Remplacer les espaces multiples
     
@@ -392,7 +384,6 @@ def split_contact(merged_df):
 
 @task
 def cleaning_funding(merged_df):
-    
     merged_df['Montant'] = merged_df['Montant'].str.replace('€', '', regex=False)  # Supprimer €
     merged_df['Montant'] = merged_df['Montant'].str.replace(',', '.')  # Remplace la virgule par un point
     # Supprimer les espaces avant les unités (M, k, B)
@@ -400,17 +391,55 @@ def cleaning_funding(merged_df):
     merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)M', r'\1e6', regex=True)
     merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)k', r'\1e3', regex=True)
     merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)B', r'\1e9', regex=True)
+
+    merged_df['financement'] = merged_df['financement'].str.replace('€', '', regex=False)
+    merged_df['financement'] = merged_df['financement'].str.replace('-', '', regex=False)
+    merged_df['financement'] = merged_df['financement'].str.replace(',', '.')  
+    # Supprimer les espaces avant les unités (M, k, B)
+    merged_df['financement'] = merged_df['financement'].str.replace(r'\s*([MkB])', r'\1', regex=True)
+    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)m', r'\1e6', regex=True)
+    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)k', r'\1e3', regex=True)
+    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)b', r'\1e9', regex=True)
+    merged_df['financement'] = merged_df['financement'].replace(["", "nan", None], np.nan)
     
-    # Supprimer les valeurs non valides
-    merged_df['Montant_def'] = merged_df['Montant_def'].replace(["nan", "None", "", np.nan], np.nan)
-  
-    logger.info(f"Financement nettoyé")
+    logger.info("Financement néttoyés")
+
+    # Fusion des financements
+    financement_cols = ['Montant', 'financement']
+    merged_df["Montant_def"] = (
+    merged_df[financement_cols]
+    .stack()
+    .groupby(level=0)
+    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+    )
+    merged_df["Montant_def"] = merged_df["Montant_def"].apply(lambda x: float(x[0]) if isinstance(x, list) and len(x) > 0 else np.nan)
+
+    logger.info("Financement fusionnés")
+
+    merged_df.drop(columns=financement_cols, inplace=True)
+
+    logger.info(f"Financement nettoyé et fusionné")
+>>>>>>> Stashed changes
     return merged_df
-
-
 
 #@task
 #def fil_type_organisme(merged_df):
+
+@task
+def deduplicate_and_save(merged_df):
+    """ 
+    Regroupe les lignes avec le même 'nom' et fusionne les valeurs des autres colonnes
+    sans générer de doublons dans chaque colonne.
+    """
+    # Fonction pour fusionner les valeurs uniques d'une colonne en supprimant les doublons
+    def merge_values(series):
+        unique_values = pd.Series(series.dropna().unique())  # Supprime les NaN et garde valeurs uniques
+        unique_values = unique_values.apply(str)  # Convertit en string pour éviter les problèmes
+        return ", ".join(sorted(set(unique_values))) if not unique_values.empty else None  # Supprime doublons et trie
+    # Regrouper par 'nom' et fusionner les autres colonnes sans doublons
+    merged_df = merged_df.groupby("nom", as_index=False).agg(lambda x: merge_values(x))
+    return merged_df  
+
 
 @task
 def save_data(df):
@@ -447,11 +476,11 @@ def create_database(merged_df):
     personnes.insert(0, "contact_id", range(1, len(personnes) + 1))
     
     # Table des Financements avec entreprise_id et création de financement_id
-    financements = merged_df[['nom', 'Date dernier financement', 'Série', 'Montant', 'financement',
-                                'valeur_entreprise', 'dernier_financement']].drop_duplicates()
+    financements = merged_df[['nom', 'Date dernier financement', 'Série', 'Montant_def',
+                                'valeur_entreprise']].drop_duplicates()
     financements = financements.merge(societes[['nom', 'entreprise_id']], on='nom', how='left')
-    financements = financements[['entreprise_id', 'Date dernier financement', 'Série', 'Montant', 'financement',
-                                   'valeur_entreprise', 'dernier_financement']]
+    financements = financements[['entreprise_id', 'Date dernier financement', 'Série', 'Montant_def',
+                                   'valeur_entreprise']]
     financements.insert(0, "financement_id", range(1, len(financements) + 1))
     
     # Sauvegarde des datasets
@@ -483,7 +512,9 @@ def data_pipeline():
     # Création des colonnes contacts 
     merged_df = split_contact(merged_df)
     # Cleaning de la partie financement / montants 
-    #merged_df = cleaning_funding(merged_df)
+    merged_df = cleaning_funding(merged_df)
+    # Dédoublonnage !!!!! 
+    merged_df = deduplicate_and_save(merged_df)
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
