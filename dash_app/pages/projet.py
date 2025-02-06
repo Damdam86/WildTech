@@ -1,35 +1,210 @@
-from dash import Dash, html, dcc, Output, Input
+import dash
+from dash import html, dcc
 import dash_bootstrap_components as dbc
-import pandas as pd
-from dash import callback
 
-app = Dash()
+layout = html.Div([
+    # Hero Section avec image de fond et overlay
+    html.Div([
+        dbc.Container([
+            dbc.Row([
+                dbc.Col([
+                    html.H1("Le Projet", className="hero-title mb-4"),
+                    html.H5(
+                        "Une analyse approfondie de l'écosystème startup français basée sur plus de 10,000 entreprises",
+                        className="hero-subtitle mb-4"
+                    ),
+                ], md=8, lg=6)
+            ], className="min-vh-75 align-items-center")
+        ], fluid=True)
+    ], className="hero-section mb-5"),
 
-layout = dbc.Container([
+    dbc.Container([
+        # Section Métriques
+        html.Div([
+            html.H2("Objectifs Pédagogiques", className="section-title text-center mb-5"),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("Collecte de données", className="metric-value"),
+                        ], className="metric-number"),
+                        html.P("Acquisition de données depuis diverses sources (APIs, fichiers, bases de données).", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("Cleaning - pipeline", className="metric-value"),
+                        ], className="metric-number"),
+                        html.P("Application de techniques de traitement des données avec Python. Conception et mise en œuvre d’un processus d’Extraction, Transformation et Chargement.", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("Visualisation et reporting ", className="metric-value"),
+                        ], className="metric-number"),
+                        html.P("Création d'un tableau de bord dynamique et interactif.", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("IA et enrichissement", className="metric-value"),
+                        ], className="metric-number"),
+                        html.P("Exploration des apports de l’intelligence artificielle dans l’analyse des données.", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4")
+            ]),
+            html.H2("Métriques Clés", className="section-title text-center mb-5"),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("8", className="metric-value"),
+                            html.Span("sources différentes", className="metric-symbol")
+                        ], className="metric-number"),
+                        html.P("Pour la création de la base", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("2 API", className="metric-value"),
+                            html.Span("SIREN et OPENAI", className="metric-symbol")
+                        ], className="metric-number"),
+                        html.P("Pour compléter les informations", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("XXX", className="metric-value"),
+                            html.Span("mots clés", className="metric-symbol")
+                        ], className="metric-number"),
+                        html.P("Pour rechercher dans la base", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("10", className="metric-value"),
+                            html.Span("k+", className="metric-symbol")
+                        ], className="metric-number"),
+                        html.P("Dans notre base de données", className="metric-label")
+                    ], className="metric-card")
+                ], md=6, lg=3, className="mb-4")
+            ])
+        ], className="mb-5"),
 
-    # Titre principal
-    html.H1("Notre projet", className="text-center my-4"),
-    
-    html.H6("Ce projet est une vraie aventure dans le monde des données ! Vous allez créer de A à Z votre propre application d’analyse de données. Le plus cool ? C’est VOUS qui choisissez votre sujet et vos sources de données. Que vous soyez passionné(e) par :"),
-    
-    dcc.Markdown('''
-    * Le business et l’analyse de marchés
-    * La production industrielle et l’optimisation
-    * La finance et les tendances économiques
-    * Le sport et ses performances
-    * L’environnement et le développement durable
-    * Les médias sociaux et le marketing digital
-    * La musique ou le cinéma
-    * Les jeux vidéo et le gaming … ou tout autre domaine qui vous intéresse, vous pourrez orienter votre projet dans cette direction !'''),
-    html.H6("Bien sûr, pour que tout le monde puisse avancer ensemble et s’entraider, on suivra les mêmes étapes et la même structure de projet. Vous devez respecter le workflow suivant : collecter des données, les transformer, les analyser et créer des tableaux de bord visuels, vous êtes des DATA-Analystes maintenant, vous savez de quoi on parle. Et pour rendre tout ça encore plus intéressant, on utilisera même l’IA pour enrichir vos analyses !L’idée est simple : vous êtes libre de laisser parler votre créativité sur le QUOI, pendant qu’on vous guide sur le COMMENT. Que vous visiez un projet purment professionnel ou qui joint le personnel, c’est l’occasion de développer des compétences concrètes sur un sujet qui vous tient à cœur ! 🚀", className="text-left my-4"),
+        # Section Notre Approche
+        html.Div([
+            html.H2("Notre Approche", className="section-title text-center mb-5", id="methodology"),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("1", className="step-number"),
+                            html.H4("Collecte de Données", className="metric-value"),
+                            html.P("Scraping depuis 8 sources", className="text-muted"),
+                            html.Ul([
+                                html.Li("Utilisation de Selenium dans 90% des cas"),
+                                html.Li("Les scraping ne sont pas automatisés"),
+                                html.Li("Difficilement 'automatisable'")
+                            ], className="step-list")
+                        ])
+                    ], className="step-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("2", className="step-number"),
+                            html.H4("Nettoyage", className="metric-value"),
+                            html.P("Traitement et standardisation des données", className="text-muted"),
+                            html.Ul([
+                                html.Li("Normalisation des formats"),
+                                html.Li("Explosion des colonnes"),
+                                html.Li("Fusion des mots clés, adresse, site web"),
+                                html.Li("Création d'un pipeline automatisé sous Prefect")
+                            ], className="step-list")
+                        ])
+                    ], className="step-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("3", className="step-number"),
+                            html.H4("Analyse", className="metric-value"),
+                            html.P("Modélisation et analyse exploratoire", className="text-muted"),
+                            html.Ul([
+                                html.Li("Détection des tendances"),
+                                html.Li("Regroupement par industries"),
+                                html.Li("Analyse des financements")
+                            ], className="step-list")
+                        ])
+                    ], className="step-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span("4", className="step-number"),
+                            html.H4("Visualisation", className="metric-value"),
+                            html.P("Création d'un dashboard et d'une interface", className="text-muted"),
+                            html.Ul([
+                                html.Li("Dash pour l'interface"),
+                                html.Li("Plotly pour les visualisations"),
+                                html.Li("Déploiement sur serveur cloud")
+                            ], className="step-list")
+                        ])
+                    ], className="step-card")
+                ], md=6, lg=3, className="mb-4")
+            ])
+        ], className="mb-5"),
 
-    html.H6("Les étapes du projet: "),
-    dcc.Markdown('''
-    * 1 .Acquisition des Données
-    * 2 .Traitement et Nettoyage
-    * 3 .Infrastructure de Données
-    * 4 .Visualisation
-    * 5 .Interface Utilisateur
-    * 6 .Enrichissement IA (optionnel)''')
-
-], fluid=True)
+        # Section Technologies
+        html.Div([
+            html.H2("Technologies utilisées", className="section-title text-center mb-5"),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.H4("Backend", className="metric-value"),
+                        html.Div([
+                            dbc.Badge("Python", color="primary", className="me-2 mb-2"),
+                            dbc.Badge("FastAPI", color="success", className="me-2 mb-2"),
+                            dbc.Badge("OpenAI", color="secondary", className="me-2 mb-2")
+                        ])
+                    ], className="tech-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.H4("Scraping", className="metric-value"),
+                        html.Div([
+                            dbc.Badge("Pandas", color="primary", className="me-2 mb-2"),
+                            dbc.Badge("BeautifulSoup", color="secondary", className="me-2 mb-2"),
+                            dbc.Badge("Selenium", color="success", className="me-2 mb-2")
+                        ])
+                    ], className="tech-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.H4("Data Processing", className="metric-value"),
+                        html.Div([
+                            dbc.Badge("Pandas", color="primary", className="me-2 mb-2"),
+                            dbc.Badge("NumPy", color="success", className="me-2 mb-2"),
+                            dbc.Badge("Scikit-learn", color="info", className="me-2 mb-2")
+                        ])
+                    ], className="tech-card")
+                ], md=6, lg=3, className="mb-4"),
+                dbc.Col([
+                    html.Div([
+                        html.H4("Visualisation", className="metric-value"),
+                        html.Div([
+                            dbc.Badge("Plotly", color="primary", className="me-2 mb-2"),
+                            dbc.Badge("Dash", color="success", className="me-2 mb-2")
+                        ])
+                    ], className="tech-card")
+                ], md=6, lg=3, className="mb-4")
+            ])
+        ], className="mb-5")
+    ], fluid=True, className="bg-white py-5")
+], className="project-page")

@@ -29,7 +29,7 @@ def get_dataframe(filename):
     json_string = dataframes[filename]  # Récupère la chaîne JSON
     return pd.read_json(StringIO(json_string), orient='split')  # Convertit en DataFrame en utilisant StringIO pour le FutureWarning
 
-from pages import home, dashboard, projet  # Importer les pages
+from pages import home, dashboard, projet, dashboard2 # Importer les pages
 
 # Barre de navigation
 navbar = dbc.NavbarSimple(
@@ -40,7 +40,8 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Accueil", href="/home")),
         dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
-        dbc.NavItem(dbc.NavLink("Projet", href="/projet"))
+        dbc.NavItem(dbc.NavLink("Projet", href="/projet")),
+        dbc.NavItem(dbc.NavLink("Dashboard2", href="/dashboard2"))
     ])
 
 # Layout
@@ -60,8 +61,10 @@ def display_page(pathname):
         return dashboard.layout
     elif pathname == '/projet':
         return projet.layout
+    elif pathname == '/dashboard2':
+        return dashboard2.layout
     else:
         return home.layout
-
+    
 if __name__ == '__main__':
     app.run_server(debug=True)
