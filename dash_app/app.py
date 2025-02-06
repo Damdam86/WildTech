@@ -65,6 +65,18 @@ def display_page(pathname):
         return dashboard2.layout
     else:
         return home.layout
-    
+
+@app.callback(
+    Output("total-startups", "children"),  
+    Input('url', 'pathname')  
+)
+def update_total_startups(_):
+    df_financement = get_dataframe("financements.csv")  
+    total_funding = df_financement['Montant_def'].sum() 
+
+    return f"{total_funding:,.0f} €"  # ✅ Formatage avec séparateur de milliers
+
+
+
 if __name__ == '__main__':
     app.run_server(debug=True)

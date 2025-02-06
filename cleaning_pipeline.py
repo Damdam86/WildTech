@@ -188,14 +188,14 @@ def cleaning_data2(merged_df):
     logger.info("Adresses fusionnés")
 
     # Fusion des financements
-    financement_cols = ['Montant', 'financement']
-    merged_df["Montant_def"] = (
-    merged_df[financement_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
-    )
-    logger.info("Financement fusionnés")
+    #financement_cols = ['Montant', 'financement']
+    #merged_df["Montant_def"] = (
+    #merged_df[financement_cols]
+    #.stack()
+    #.groupby(level=0)
+    #.agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+    
+    #logger.info("Financement fusionnés")
     
     # Fusion des dates de création
     creation_cols = ['Date de création_x', 'date de création','Date de création_y']
@@ -224,7 +224,7 @@ def cleaning_data2(merged_df):
 
     #Suppression des colonnes
     merged_df.drop(columns=mots_cles_cols, inplace=True)
-    merged_df.drop(columns=financement_cols, inplace=True)
+    #merged_df.drop(columns=financement_cols, inplace=True)
     merged_df.drop(columns=site_web_cols, inplace=True)
     merged_df.drop(columns=adresse_cols, inplace=True)
     merged_df.drop(columns=creation_cols, inplace=True)
@@ -389,29 +389,44 @@ def split_contact(merged_df):
     merged_df.drop(columns=['Contact'], inplace=True)
     return merged_df
 
+
 @task
 def cleaning_funding(merged_df):
-    # Nettoyage de la colonne 'Montant'
-    merged_df['Montant_def'] = merged_df['Montant_def'].astype(str)  # Assurer que tout est en texte
-    merged_df['Montant_def'] = merged_df['Montant_def'].str.replace('€', '', regex=False)  # Supprimer le symbole €
-    merged_df['Montant_def'] = merged_df['Montant_def'].str.replace(',', '.')  # Remplace la virgule par un point
-
-    # Remplacement des 'M', 'k' et 'B' directement dans la colonne
-    merged_df['Montant_def'] = merged_df['Montant_def'].str.replace(r'(\d+(\.\d+)?)M', r'\1*1_000_000', regex=True)
-    merged_df['Montant_def'] = merged_df['Montant_def'].str.replace(r'(\d+(\.\d+)?)k', r'\1*1_000', regex=True)
-    merged_df['Montant_def'] = merged_df['Montant_def'].str.replace(r'(\d+(\.\d+)?)B', r'\1*1_000_000_000', regex=True)
-
-    # Remplace les valeurs NaN par une chaîne vide pour éviter eval() sur "nan"
-    merged_df['Montant_def'] = merged_df['Montant_def'].replace(["nan", "None", ""], np.nan)
     
-    # Supprimer les NaN avant eval()
-    merged_df = merged_df.dropna(subset=['Montant_def'])
+    merged_df['Montant'] = merged_df['Montant'].str.replace('€', '', regex=False)  # Supprimer €
+    merged_df['Montant'] = merged_df['Montant'].str.replace(',', '.')  # Remplace la virgule par un point
+    # Supprimer les espaces avant les unités (M, k, B)
+    merged_df['Montant'] = merged_df['Montant'].str.replace(r'\s*([MkB])', r'\1', regex=True)
+    merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)M', r'\1e6', regex=True)
+    merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)k', r'\1e3', regex=True)
+    merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)B', r'\1e9', regex=True)
+    
+    # Supprimer les valeurs non valides
+    merged_df['Montant_def'] = merged_df['Montant_def'].replace(["nan", "None", "", np.nan], np.nan)
+  
+    # Sécuriser l'évaluation des expressions mathématiques
+    def safe_eval(x):
+        try:
+            return eval(x) if isinstance(x, str) and any(char.isdigit() for char in x) else np.nan
+        except:
+            return np.nan  # Sécurisation en cas d'erreur
 
-    # Assurer que seules des expressions valides sont évaluées
-    merged_df['Montant_def'] = merged_df['Montant_def'].map(lambda x: eval(x) if isinstance(x, str) and x.replace('.', '', 1).isdigit() else np.nan)
+    merged_df['Montant_def'] = merged_df['Montant_def'].map(safe_eval)
+
+    # Vérifier après évaluation
+    print("🔵 Après évaluation avec eval() :")
+    print(merged_df[['Montant_def']].head(10))
+
+    # Convertir en type numérique
+    merged_df['Montant_def'] = pd.to_numeric(merged_df['Montant_def'], errors='coerce')
+
+    # Vérifier après conversion finale
+    print("✅ Après conversion finale en nombre :")
+    print(merged_df[['Montant_def']].head(10))
 
     logger.info(f"Financement nettoyé")
     return merged_df
+
 
 
 #@task
@@ -452,10 +467,10 @@ def create_database(merged_df):
     personnes.insert(0, "contact_id", range(1, len(personnes) + 1))
     
     # Table des Financements avec entreprise_id et création de financement_id
-    financements = merged_df[['nom', 'Date dernier financement', 'Série', 'Montant_def', 
+    financements = merged_df[['nom', 'Date dernier financement', 'Série', 'Montant', 'financement',
                                 'valeur_entreprise', 'dernier_financement']].drop_duplicates()
     financements = financements.merge(societes[['nom', 'entreprise_id']], on='nom', how='left')
-    financements = financements[['entreprise_id', 'Date dernier financement', 'Série', 'Montant_def', 
+    financements = financements[['entreprise_id', 'Date dernier financement', 'Série', 'Montant', 'financement',
                                    'valeur_entreprise', 'dernier_financement']]
     financements.insert(0, "financement_id", range(1, len(financements) + 1))
     
@@ -488,7 +503,7 @@ def data_pipeline():
     # Création des colonnes contacts 
     merged_df = split_contact(merged_df)
     # Cleaning de la partie financement / montants 
-    merged_df = cleaning_funding(merged_df)
+    #merged_df = cleaning_funding(merged_df)
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
