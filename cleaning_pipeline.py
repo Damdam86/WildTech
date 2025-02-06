@@ -404,26 +404,6 @@ def cleaning_funding(merged_df):
     # Supprimer les valeurs non valides
     merged_df['Montant_def'] = merged_df['Montant_def'].replace(["nan", "None", "", np.nan], np.nan)
   
-    # Sécuriser l'évaluation des expressions mathématiques
-    def safe_eval(x):
-        try:
-            return eval(x) if isinstance(x, str) and any(char.isdigit() for char in x) else np.nan
-        except:
-            return np.nan  # Sécurisation en cas d'erreur
-
-    merged_df['Montant_def'] = merged_df['Montant_def'].map(safe_eval)
-
-    # Vérifier après évaluation
-    print("🔵 Après évaluation avec eval() :")
-    print(merged_df[['Montant_def']].head(10))
-
-    # Convertir en type numérique
-    merged_df['Montant_def'] = pd.to_numeric(merged_df['Montant_def'], errors='coerce')
-
-    # Vérifier après conversion finale
-    print("✅ Après conversion finale en nombre :")
-    print(merged_df[['Montant_def']].head(10))
-
     logger.info(f"Financement nettoyé")
     return merged_df
 
