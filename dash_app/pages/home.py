@@ -9,8 +9,10 @@ df = get_dataframe('societes.csv')
 
 layout = dbc.Container([
 
-    # Titre principal
-    html.H1("Startups", className="text-center my-4"),
+     # Section Hero
+    dbc.Row([
+        dbc.Col(html.H1("Bienvenue ", className="hero-section"), width=12)
+    ], className="mb-4"),
 
     # KPI Cards
     dbc.Row([
