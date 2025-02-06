@@ -419,14 +419,14 @@ def cleaning_funding(merged_df):
     merged_df.drop(columns=financement_cols, inplace=True)
 
     logger.info(f"Financement nettoyé et fusionné")
->>>>>>> Stashed changes
+
     return merged_df
 
 #@task
 #def fil_type_organisme(merged_df):
 
 @task
-def deduplicate_and_save(merged_df):
+def deduplicate_and_clean(merged_df):
     """ 
     Regroupe les lignes avec le même 'nom' et fusionne les valeurs des autres colonnes
     sans générer de doublons dans chaque colonne.
@@ -438,7 +438,58 @@ def deduplicate_and_save(merged_df):
         return ", ".join(sorted(set(unique_values))) if not unique_values.empty else None  # Supprime doublons et trie
     # Regrouper par 'nom' et fusionner les autres colonnes sans doublons
     merged_df = merged_df.groupby("nom", as_index=False).agg(lambda x: merge_values(x))
+
     return merged_df  
+
+
+@task
+def clean_keywords_task(merged_df):
+    """ Nettoie la colonne mots_cles_def en supprimant les doublons et les caractères inutiles. """
+
+    # Liste des caractères à supprimer
+    remove_chars = ["[", "]", "'", '"', "#", "()", "{}"]
+
+    def process_entry(entry):
+        if pd.isna(entry) or entry in ["", "[]"]:  # Gérer les NaN et listes vides
+            return None
+        
+        # 🔹 Convertir les tuples en listes
+        if isinstance(entry, tuple):
+            entry = list(entry)
+        
+        # 🔹 Convertir une chaîne qui ressemble à une liste en vraie liste
+        if isinstance(entry, str) and entry.startswith("[") and entry.endswith("]"):
+            try:
+                entry = eval(entry)  # Convertir la chaîne en liste réelle
+            except:
+                return None  # Si erreur, ignorer
+
+        # 🔹 Si ce n'est pas une liste, transformer en liste avec une seule valeur
+        if not isinstance(entry, list):
+            entry = [entry]
+        
+        # 🔹 Nettoyage : suppression des espaces et mise en minuscule
+        clean_list = sorted(set(str(item).strip().lower() for item in entry if str(item).strip()))
+
+        # 🔹 Suppression des caractères indésirables
+        clean_list = [word.translate(str.maketrans("", "", "".join(remove_chars))) for word in clean_list]
+
+        return ", ".join(clean_list) if clean_list else None  # Retourne une chaîne propre
+
+    # Appliquer la fonction sur la colonne mots_cles_def
+    merged_df["mots_cles_def"] = merged_df["mots_cles_def"].apply(process_entry)
+    merged_df["Date dernier financement"] = pd.to_datetime(
+        merged_df["Date dernier financement"], 
+        format='%Y-%m-%d',  # ⚠️ Adapte ce format à ton jeu de données
+        errors='coerce'  # 🔹 Convertit les erreurs en NaT (valeur manquante)
+        )
+    merged_df["date_creation_def"] = pd.to_datetime(
+        merged_df["date_creation_def"], 
+        format='%Y-%m-%d',  # ⚠️ Adapte ce format à ton jeu de données
+        errors='coerce'  # 🔹 Convertit les erreurs en NaT (valeur manquante)
+        )
+    
+    return merged_df
 
 
 @task
@@ -514,7 +565,9 @@ def data_pipeline():
     # Cleaning de la partie financement / montants 
     merged_df = cleaning_funding(merged_df)
     # Dédoublonnage !!!!! 
-    merged_df = deduplicate_and_save(merged_df)
+    merged_df = deduplicate_and_clean(merged_df)
+    #Clean mot clés
+    merged_df = clean_keywords_task(merged_df)
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
