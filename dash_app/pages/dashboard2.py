@@ -6,6 +6,12 @@ from app import get_dataframe  # Importer app et la fonction get_dataframe
 
 # Chargement des données
 df_societe = get_dataframe('societes.csv')
+df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extrait uniquement l'année
+
+if df_societe["annee_creation"].notna().sum() > 0:
+    min_year = int(df_societe["annee_creation"].min())
+    max_year = int(df_societe["annee_creation"].max())
 
 layout = html.Div([
     # Section Header
@@ -42,10 +48,10 @@ layout = html.Div([
                 html.Label("Année de Création", className="text-muted mb-2"),
                 dcc.RangeSlider(
                     id="year-filter",
-                    min=df_societe["date_creation_def"].min(),
-                    max=df_societe["date_creation_def"].max(),
-                    value=[df_societe["date_creation_def"].min(), df_societe["date_creation_def"].max()],
-                    marks={i: str(i) for i in range(df_societe["date_creation_def"].min(), df_societe["date_creation_def"].max() + 1, 2)},
+                    min=2000,  # ✅ Conversion en int
+                    max=max_year,  # ✅ Conversion en int
+                    value=[min_year, max_year],  # ✅ Conversion en int
+                    marks={i: str(i) for i in range(min_year, max_year + 1, 2)},  # ✅ Conversion en int
                     className="mb-3"
                 )
             ], md=4),
