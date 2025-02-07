@@ -404,6 +404,9 @@ def cleaning_funding(merged_df):
 
     # Appliquer la conversion sur chaque valeur de la colonne
     merged_df['Montant_def'] = merged_df['Montant'].apply(convert_montant)
+    
+    # Conversion en float
+    merged_df['Montant_def'] = merged_df['Montant_def'].astype(float)
 
     # Supprimer les colonnes inutiles
     merged_df.drop(columns=['financement', 'Montant'], inplace=True, errors='ignore')
