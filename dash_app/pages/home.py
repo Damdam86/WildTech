@@ -82,12 +82,12 @@ def update_startup_info(selected_startup):
                 html.P(f"Type d'organisme: {startup_data["Type d'organisme"]}, {startup_data["market"]}", className="text-center"),
                 html.P(startup_data['mots_cles_def'], className="text-center")
             ])
-        ], className="h-100"), width=4),
+        ], className="tech-card"), width=4),
 
         dbc.Col(dbc.Card([
             dbc.CardHeader("Description"),
             dbc.CardBody(html.P(startup_data["description"]))
-        ], className="h-100"), width=4),
+        ], className="tech-card"), width=4),
 
         dbc.Col(dbc.Card([
             dbc.CardHeader("Informations de contact"),
@@ -95,5 +95,5 @@ def update_startup_info(selected_startup):
                 html.P([html.Strong("Adresse: "), startup_data["adresse_def"]]),
                 html.P([html.Strong("Site web: "), html.A(startup_data["site_web_def"], href=startup_data["site_web_def"], target="_blank")])
             ])
-        ], className="h-100"), width=4)
+        ], className="tech-card"), width=4)
     ], className="g-4")
