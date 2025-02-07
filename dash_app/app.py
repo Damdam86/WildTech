@@ -64,13 +64,24 @@ def display_page(pathname):
         return home.layout
 
 @app.callback(
-    Output("total-startups", "children"),  
+    Output("mean-funding", "children"),  
     Input('url', 'pathname')  
 )
-def update_total_startups(_):
-    df_financement = get_dataframe("financements.csv")  
-    df_financement['Montant_def'] = pd.to_numeric(df_financement['Montant_def'], errors='coerce')  # 🔹 Forcer en float
-    total_funding = df_financement['Montant_def'].fillna(0).sum()
+def mean_funding(_):
+    df = get_dataframe("financements.csv")  
+    df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  # 🔹 Forcer en float
+    mean_funding = (df['Montant_def'].fillna(0).sum()) / len(df['entreprise_id'])
+
+    return f"{mean_funding:,.0f}"
+
+@app.callback(
+    Output("total-funding", "children"),  
+    Input('url', 'pathname')  
+)
+def total_funding(_):
+    df = get_dataframe("financements.csv")  
+    df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  # 🔹 Forcer en float
+    total_funding = df['Montant_def'].fillna(0).sum()
 
     return f"{total_funding:,.0f}"
 

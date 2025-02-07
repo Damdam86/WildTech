@@ -48,15 +48,15 @@ layout = html.Div([
                 html.Label("Année de Création", className="text-muted mb-2"),
                 dcc.RangeSlider(
                     id="year-filter",
-                    min=2000,  # ✅ Conversion en int
-                    max=max_year,  # ✅ Conversion en int
-                    value=[min_year, max_year],  # ✅ Conversion en int
-                    marks={i: str(i) for i in range(min_year, max_year + 1, 2)},  # ✅ Conversion en int
+                    min=2000,  
+                    max=max_year,  
+                    value=[min_year, max_year],  
+                    marks={i: str(i) for i in range(min_year, max_year + 1, 2)}, 
                     className="mb-3"
                 )
             ], md=4),
 
-            # Colonne 3 : Taille de Financement
+            # Colonne 3 : Taille d'effectif
             dbc.Col([
                 html.Label("Taille d'effectif", className="text-muted mb-2"),
                 dcc.Dropdown(
@@ -77,7 +77,7 @@ layout = html.Div([
                     dbc.CardBody([
                         html.Div([
                             html.Div([
-                                html.Span(id="total-startups", className="metric-value"),  
+                                html.Span(id="total-funding", className="metric-value"),  
                                 html.Span("€", className="metric-symbol")
                             ], className="metric-number"),
                             html.P("Financement Total", className="metric-label")
@@ -91,10 +91,10 @@ layout = html.Div([
                     dbc.CardBody([
                         html.Div([
                             html.Div([
-                                html.Span(id="total-funding", className="metric-value"),
+                                html.Span(id="mean-funding", className="metric-value"),
                                 html.Span("€", className="metric-symbol")
                             ], className="metric-number"),
-                            html.P("Montant total des financements", className="metric-label")
+                            html.P("Financement Moyen par entreprise", className="metric-label")
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
