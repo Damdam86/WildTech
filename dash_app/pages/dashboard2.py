@@ -3,6 +3,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
 from app import get_dataframe  # Importer app et la fonction get_dataframe
+import plotly.express as px
 
 # Chargement des données
 df_societe = get_dataframe('societes.csv')
@@ -13,6 +14,16 @@ if df_societe["annee_creation"].notna().sum() > 0:
     min_year = int(df_societe["annee_creation"].min())
     max_year = int(df_societe["annee_creation"].max())
 
+df = get_dataframe('financements.csv')
+df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+df['Année'] = df['Date dernier financement'].dt.year
+df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0)
+
+#Graphs
+funding_by_year = df.groupby('Année')['Montant_def'].sum().reset_index()
+fig1 = px.line(funding_by_year, x='Année', y='Montant_def')
+
+#Layout
 layout = html.Div([
     # Section Header
     html.Div([
@@ -144,10 +155,11 @@ layout = html.Div([
                 dbc.Card([
                     dbc.CardHeader("Évolution des Financements"),
                     dbc.CardBody([
-                        dcc.Graph(id="funding-evolution")
+                        dcc.Graph(id="funding-evolution", figure=fig1)
                     ])
                 ], className="shadow-sm")
             ], md=6, className="mb-4")
         ]),
+
 ], fluid=True)
 ])

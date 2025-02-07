@@ -142,6 +142,23 @@ def total_funding(sector, year_range, effectif):
 
     return f"{total_funding:,.0f} €"
 
+#Callback pour rendre le graph funding dynamique
+@app.callback(
+    Output("funding-evolution", "figure"),
+    Input("sector-filter", "value"))
+
+def update_funding_graph(selected_sectors):
+    df = get_dataframe("financements.csv") 
+    df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+    df['Année'] = df['Date dernier financement'].dt.year
+    df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
+    df_societe = get_dataframe("societes.csv")
+    if selected_sectors:
+        df_societe = df_societe[df_societe["Activité principale"].isin(selected_sectors)]
+        df = df['entreprise_id'].isin(df_societe['entreprise_id'])
+        
+    funding_by_year = df.groupby('Année')['Montant_def'].sum().reset_index()
+    return funding_by_year
 
 if __name__ == '__main__':
     app.run_server(debug=True)
