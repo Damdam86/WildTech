@@ -223,7 +223,6 @@ def cleaning_data2(merged_df):
     merged_df.drop(columns=creation_cols, inplace=True)
     merged_df.drop(columns=effectifs_cols, inplace=True)
     merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags','dernier_financement'], inplace=True)
-    merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags','dernier_financement'], inplace=True)
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
     merged_df = merged_df.applymap(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)  # Remplacer les espaces multiples
     
@@ -386,94 +385,36 @@ def split_contact(merged_df):
 
 @task
 def cleaning_funding(merged_df):
-    merged_df['Montant'] = merged_df['Montant'].str.replace('€', '', regex=False)  # Supprimer €
-    merged_df['Montant'] = merged_df['Montant'].str.replace(',', '.')  # Remplace la virgule par un point
-    # Supprimer les espaces avant les unités (M, k, B)
-    merged_df['Montant'] = merged_df['Montant'].str.replace(r'\s*([MkB])', r'\1', regex=True)
-    merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)M', r'\1e6', regex=True)
-    merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)k', r'\1e3', regex=True)
-    merged_df['Montant'] = merged_df['Montant'].str.replace(r'(\d+(\.\d+)?)B', r'\1e9', regex=True)
+    def convert_montant(value):
+        if isinstance(value, str):
+            value = value.replace('€', '').replace(',', '.').strip()  # Nettoyage de base
+            
+            # Détection des unités et conversion manuelle
+            if 'M' in value:
+                return round(float(value.replace('M', '')) * 1_000_000)
+            elif 'k' in value:
+                return round(float(value.replace('k', '')) * 1_000)
+            elif 'B' in value:
+                return round(float(value.replace('B', '')) * 1_000_000_000)
+            elif value.replace('.', '', 1).isdigit():  # Vérifie si c'est déjà un nombre valide
+                return float(value)
+            else:
+                return np.nan  # Valeur invalide, renvoie NaN
+        return np.nan  # Gère les valeurs non valides
 
-    merged_df['financement'] = merged_df['financement'].str.replace('€', '', regex=False)
-    merged_df['financement'] = merged_df['financement'].str.replace('-', '', regex=False)
-    merged_df['financement'] = merged_df['financement'].str.replace(',', '.')  
-    # Supprimer les espaces avant les unités (M, k, B)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'\s*([MkB])', r'\1', regex=True)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)m', r'\1e6', regex=True)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)k', r'\1e3', regex=True)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)b', r'\1e9', regex=True)
-    merged_df['financement'] = merged_df['financement'].replace(["", "nan", None], np.nan)
-    
-    logger.info("Financement néttoyés")
+    # Appliquer la conversion sur chaque valeur de la colonne
+    merged_df['Montant_def'] = merged_df['Montant'].apply(convert_montant)
 
-    # Fusion des financements
-    financement_cols = ['Montant', 'financement']
-    merged_df["Montant_def"] = (
-    merged_df[financement_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
-    )
-    merged_df["Montant_def"] = merged_df["Montant_def"].apply(lambda x: float(x[0]) if isinstance(x, list) and len(x) > 0 else np.nan)
+    # Supprimer les colonnes inutiles
+    merged_df.drop(columns=['financement', 'Montant'], inplace=True, errors='ignore')
 
-    logger.info("Financement fusionnés")
-
-    merged_df.drop(columns=financement_cols, inplace=True)
-
-    merged_df['financement'] = merged_df['financement'].str.replace('€', '', regex=False)
-    merged_df['financement'] = merged_df['financement'].str.replace('-', '', regex=False)
-    merged_df['financement'] = merged_df['financement'].str.replace(',', '.')  
-    # Supprimer les espaces avant les unités (M, k, B)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'\s*([MkB])', r'\1', regex=True)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)m', r'\1e6', regex=True)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)k', r'\1e3', regex=True)
-    merged_df['financement'] = merged_df['financement'].str.replace(r'(\d+(\.\d+)?)b', r'\1e9', regex=True)
-    merged_df['financement'] = merged_df['financement'].replace(["", "nan", None], np.nan)
-    
-    logger.info("Financement néttoyés")
-
-    # Fusion des financements
-    financement_cols = ['Montant', 'financement']
-    merged_df["Montant_def"] = (
-    merged_df[financement_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
-    )
-    merged_df["Montant_def"] = merged_df["Montant_def"].apply(lambda x: float(x[0]) if isinstance(x, list) and len(x) > 0 else np.nan)
-
-    logger.info("Financement fusionnés")
-
-    merged_df.drop(columns=financement_cols, inplace=True)
-
-    logger.info(f"Financement nettoyé et fusionné")
     logger.info(f"Financement nettoyé et fusionné")
 
     return merged_df
 
+
 #@task
 #def fil_type_organisme(merged_df):
-
-from prefect import task
-import pandas as pd
-
-from prefect import task
-import pandas as pd
-
-@task
-def deduplicate_and_save(merged_df):
-    """ 
-    Regroupe les lignes avec le même 'nom' et fusionne les valeurs des autres colonnes
-    sans générer de doublons dans chaque colonne.
-    """
-    # Fonction pour fusionner les valeurs uniques d'une colonne en supprimant les doublons
-    def merge_values(series):
-        unique_values = pd.Series(series.dropna().unique())  # Supprime les NaN et garde valeurs uniques
-        unique_values = unique_values.apply(str)  # Convertit en string pour éviter les problèmes
-        return ", ".join(sorted(set(unique_values))) if not unique_values.empty else None  # Supprime doublons et trie
-    # Regrouper par 'nom' et fusionner les autres colonnes sans doublons
-    merged_df = merged_df.groupby("nom", as_index=False).agg(lambda x: merge_values(x))
-    return merged_df  
 
 
 @task
@@ -618,9 +559,6 @@ def data_pipeline():
     # Création des colonnes contacts 
     merged_df = split_contact(merged_df)
     # Cleaning de la partie financement / montants 
-    merged_df = cleaning_funding(merged_df)
-    # Dédoublonnage !!!!! 
-    merged_df = deduplicate_and_save(merged_df)
     merged_df = cleaning_funding(merged_df)
     # Dédoublonnage !!!!! 
     merged_df = deduplicate_and_clean(merged_df)
