@@ -5,6 +5,8 @@ from dash.dependencies import Input, Output
 import pandas as pd
 from flask_caching import Cache
 from io import StringIO
+import plotly.express as px
+
 
 # Initialisation de l'application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
@@ -151,14 +153,17 @@ def update_funding_graph(selected_sectors):
     df = get_dataframe("financements.csv") 
     df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
     df['Année'] = df['Date dernier financement'].dt.year
+    df = df.dropna(subset=["Année"])
+    df["Année"] = df["Année"].astype(int)
     df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
     df_societe = get_dataframe("societes.csv")
     if selected_sectors:
         df_societe = df_societe[df_societe["Activité principale"].isin(selected_sectors)]
-        df = df['entreprise_id'].isin(df_societe['entreprise_id'])
+        df = df[df['entreprise_id'].isin(df_societe['entreprise_id'])]
         
     funding_by_year = df.groupby('Année')['Montant_def'].sum().reset_index()
-    return funding_by_year
+    fig1 = px.line(funding_by_year, x='Année', y='Montant_def')
+    return fig1
 
 if __name__ == '__main__':
     app.run_server(debug=True)
