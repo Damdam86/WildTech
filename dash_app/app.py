@@ -65,25 +65,83 @@ def display_page(pathname):
 
 @app.callback(
     Output("mean-funding", "children"),  
-    Input('url', 'pathname')  
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ]  
 )
-def mean_funding(_):
+def mean_funding(sector, year_range, effectif):
     df = get_dataframe("financements.csv")  
-    df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  # 🔹 Forcer en float
-    mean_funding = (df['Montant_def'].fillna(0).sum()) / len(df['entreprise_id'])
+    df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  # Conversion en float
 
-    return f"{mean_funding:,.0f}"
+    # Charger les données sociétés pour le filtre sur l'activité et l'effectif
+    df_societe = get_dataframe("societes.csv")
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # ✅ Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        if effectif:
+            if not isinstance(effectif, (list, set, tuple)):  # Vérifier si c'est un type iterable
+                effectif = [effectif]
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[(df_societe["annee_creation"] >= year_range[0]) & 
+                                (df_societe["annee_creation"] <= year_range[1])]
+
+    # Filtrer les entreprises en fonction des sociétés filtrées
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+
+    # Calcul du financement moyen
+    if df["entreprise_id"].nunique() > 0:
+        mean_funding = df['Montant_def'].fillna(0).sum() / df["entreprise_id"].nunique()
+    else:
+        mean_funding = 0  # Évite la division par zéro
+
+    return f"{mean_funding:,.0f} €"
+
 
 @app.callback(
     Output("total-funding", "children"),  
-    Input('url', 'pathname')  
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ]  
 )
-def total_funding(_):
+def total_funding(sector, year_range, effectif):
     df = get_dataframe("financements.csv")  
-    df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  # 🔹 Forcer en float
+    df_societe = get_dataframe("societes.csv")  # Charge une seule fois
+
+    # Conversion des colonnes
+    df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # ✅ Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        if not isinstance(effectif, (list, set, tuple)):  # Vérifier si c'est un type iterable
+            effectif = [effectif]
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[
+            (df_societe["annee_creation"].notna()) &  # ✅ Évite les NaN
+            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    # Filtrer les entreprises en fonction des sociétés filtrées
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+
+    # Calcul du financement total
     total_funding = df['Montant_def'].fillna(0).sum()
 
-    return f"{total_funding:,.0f}"
+    return f"{total_funding:,.0f} €"
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
