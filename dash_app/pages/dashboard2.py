@@ -23,43 +23,46 @@ layout = html.Div([
     dbc.Container([
         # Filtres
         dbc.Card([
-            dbc.CardBody([
-                dbc.Row([
-                    dbc.Col([
-                        dcc.Dropdown(
-                            id="sector-filter",
-                            options=[{"label": secteur, "value": secteur} for secteur in df_societe["Activité principale"].dropna().unique()],
-                            placeholder="Tous les secteurs",
-                            multi=True,
-                            className="mb-3"
-                        ), 
-                        html.Label("Année de Création", className="text-muted mb-2"),
-                        dcc.RangeSlider(
-                            id="year-filter",
-                            min=2010,
-                            max=2024,
-                            value=[2010, 2024],
-                            marks={i: str(i) for i in range(2010, 2025, 2)},
-                            className="mb-3"
-                        ),
-                    ], md=4),
-                            dbc.Col([
-                                html.Label("Taille de Financement", className="text-muted mb-2"),
-                                dcc.Dropdown(
-                                    id="funding-filter",
-                                    options=[
-                                        {"label": "< 1M€", "value": "seed"},
-                                        {"label": "1M€ - 5M€", "value": "series_a"},
-                                        {"label": "5M€ - 20M€", "value": "series_b"},
-                                        {"label": "> 20M€", "value": "growth"}
-                                    ],
-                                    placeholder="Toutes les tailles",
-                                    className="mb-3"
-                                )
-                            ], md=4)
-                        ])
-                    ])
-                ], className="shadow-sm mb-4"),
+    dbc.CardBody([
+        dbc.Row([
+            # Colonne 1 : Activité principale
+            dbc.Col([
+                html.Label("Activité principale", className="text-muted mb-2"),
+                dcc.Dropdown(
+                    id="sector-filter",
+                    options=[{"label": secteur, "value": secteur} for secteur in df_societe["Activité principale"].dropna().unique()],
+                    placeholder="Tous les secteurs",
+                    multi=True,
+                    className="mb-3"
+                )
+            ], md=4),
+
+            # Colonne 2 : Année de Création
+            dbc.Col([
+                html.Label("Année de Création", className="text-muted mb-2"),
+                dcc.RangeSlider(
+                    id="year-filter",
+                    min=df_societe["date_creation_def"].min(),
+                    max=df_societe["date_creation_def"].max(),
+                    value=[df_societe["date_creation_def"].min(), df_societe["date_creation_def"].max()],
+                    marks={i: str(i) for i in range(df_societe["date_creation_def"].min(), df_societe["date_creation_def"].max() + 1, 2)},
+                    className="mb-3"
+                )
+            ], md=4),
+
+            # Colonne 3 : Taille de Financement
+            dbc.Col([
+                html.Label("Taille d'effectif", className="text-muted mb-2"),
+                dcc.Dropdown(
+                    id="effectif-filter",
+                    options=[{"label": effectif, "value": effectif} for effectif in df_societe["Effectif_def"].dropna().unique()],
+                    placeholder="Toutes les tailles",
+                    className="mb-3"
+                )
+            ], md=4)
+        ])
+    ])
+], className="shadow-sm mb-4"),
 
         # KPI Cards
         dbc.Row([
@@ -75,7 +78,7 @@ layout = html.Div([
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
-            ], md=3, className="mb-4"),  # ✅ Correction ici
+            ], md=3, className="mb-4"),  
 
             dbc.Col([
                 dbc.Card([
@@ -89,7 +92,7 @@ layout = html.Div([
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
-            ], md=3, className="mb-4"),  # ✅ Correction ici
+            ], md=3, className="mb-4"),  
 
             dbc.Col([
                 dbc.Card([
@@ -103,7 +106,7 @@ layout = html.Div([
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
-            ], md=3, className="mb-4"),  # ✅ Correction ici
+            ], md=3, className="mb-4"),
 
             dbc.Col([
                 dbc.Card([
@@ -117,7 +120,7 @@ layout = html.Div([
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
-            ], md=3, className="mb-4")  # ✅ Correction ici
+            ], md=3, className="mb-4")  
         ]),
 
         # Graphiques
