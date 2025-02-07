@@ -69,9 +69,10 @@ def display_page(pathname):
 )
 def update_total_startups(_):
     df_financement = get_dataframe("financements.csv")  
+    df_financement['Montant_def'] = pd.to_numeric(df_financement['Montant_def'], errors='coerce')  # 🔹 Forcer en float
     total_funding = df_financement['Montant_def'].fillna(0).sum()
 
-    return f"{total_funding:,.0f} €"  # ✅ Formatage avec séparateur de milliers
+    return f"{total_funding:,.0f}"
 
 if __name__ == '__main__':
     app.run_server(debug=True)

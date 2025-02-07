@@ -5,7 +5,7 @@ import pandas as pd
 from app import get_dataframe  # Importer app et la fonction get_dataframe
 
 # Chargement des données
-df_financement = get_dataframe('financements.csv')
+df_societe = get_dataframe('societes.csv')
 
 layout = html.Div([
     # Section Header
@@ -26,10 +26,13 @@ layout = html.Div([
             dbc.CardBody([
                 dbc.Row([
                     dbc.Col([
-                        html.Label("Secteur d'Activité", className="text-muted mb-2"),
-                        dcc.Dropdown(id="sector-filter", placeholder="Tous les secteurs", multi=True, className="mb-3")
-                    ], md=4),
-                    dbc.Col([
+                        dcc.Dropdown(
+                            id="sector-filter",
+                            options=[{"label": secteur, "value": secteur} for secteur in df_societe["Activité principale"].dropna().unique()],
+                            placeholder="Tous les secteurs",
+                            multi=True,
+                            className="mb-3"
+                        ), 
                         html.Label("Année de Création", className="text-muted mb-2"),
                         dcc.RangeSlider(
                             id="year-filter",
@@ -38,25 +41,25 @@ layout = html.Div([
                             value=[2010, 2024],
                             marks={i: str(i) for i in range(2010, 2025, 2)},
                             className="mb-3"
-                        )
+                        ),
                     ], md=4),
-                    dbc.Col([
-                        html.Label("Taille de Financement", className="text-muted mb-2"),
-                        dcc.Dropdown(
-                            id="funding-filter",
-                            options=[
-                                {"label": "< 1M€", "value": "seed"},
-                                {"label": "1M€ - 5M€", "value": "series_a"},
-                                {"label": "5M€ - 20M€", "value": "series_b"},
-                                {"label": "> 20M€", "value": "growth"}
-                            ],
-                            placeholder="Toutes les tailles",
-                            className="mb-3"
-                        )
-                    ], md=4)
-                ])
-            ])
-        ], className="shadow-sm mb-4"),
+                            dbc.Col([
+                                html.Label("Taille de Financement", className="text-muted mb-2"),
+                                dcc.Dropdown(
+                                    id="funding-filter",
+                                    options=[
+                                        {"label": "< 1M€", "value": "seed"},
+                                        {"label": "1M€ - 5M€", "value": "series_a"},
+                                        {"label": "5M€ - 20M€", "value": "series_b"},
+                                        {"label": "> 20M€", "value": "growth"}
+                                    ],
+                                    placeholder="Toutes les tailles",
+                                    className="mb-3"
+                                )
+                            ], md=4)
+                        ])
+                    ])
+                ], className="shadow-sm mb-4"),
 
         # KPI Cards
         dbc.Row([
