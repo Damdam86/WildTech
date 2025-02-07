@@ -59,10 +59,10 @@ layout = html.Div([
                 html.Label("Année de Création", className="text-muted mb-2"),
                 dcc.RangeSlider(
                     id="year-filter",
-                    min=2000,  
+                    min=1986,  
                     max=max_year,  
                     value=[min_year, max_year],  
-                    marks={i: str(i) for i in range(min_year, max_year + 1, 2)}, 
+                    marks={i: str(i) for i in range(min_year, max_year + 1, 4)}, 
                     className="mb-3"
                 )
             ], md=4),
@@ -116,10 +116,10 @@ layout = html.Div([
                     dbc.CardBody([
                         html.Div([
                             html.Div([
-                                html.Span(id="avg-funding", className="metric-value"),
-                                html.Span("€", className="metric-symbol")
+                                html.Span(id="nbre-startup", className="metric-value"),
+                                html.Span("", className="metric-symbol")
                             ], className="metric-number"),
-                            html.P("Financement Moyen", className="metric-label")
+                            html.P("startups créées", className="metric-label")
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
@@ -130,10 +130,10 @@ layout = html.Div([
                     dbc.CardBody([
                         html.Div([
                             html.Div([
-                                html.Span(id="active-startups", className="metric-value"),
+                                html.Span(id="pourc-leve", className="metric-value"),
                                 html.Span("%", className="metric-symbol")
                             ], className="metric-number"),
-                            html.P("Startups Actives", className="metric-label")
+                            html.P("Des entreprises ont levé des fonds", className="metric-label")
                         ], className="metric-card")
                     ])
                 ], className="shadow-sm")
@@ -144,9 +144,9 @@ layout = html.Div([
         dbc.Row([
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader("Répartition par Secteur"),
+                    dbc.CardHeader("Répartition des financement par typologie"),
                     dbc.CardBody([
-                        dcc.Graph(id="sector-distribution")
+                        dcc.Graph(id="serie-funding")
                     ])
                 ], className="shadow-sm")
             ], md=6, className="mb-4"),
@@ -155,7 +155,25 @@ layout = html.Div([
                 dbc.Card([
                     dbc.CardHeader("Évolution des Financements"),
                     dbc.CardBody([
-                        dcc.Graph(id="funding-evolution", figure=fig1)
+                        dcc.Graph(id="funding-evolution")
+                    ])
+                ], className="shadow-sm")
+            ], md=6, className="mb-4"),
+
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Évolution des Financements"),
+                    dbc.CardBody([
+                        dcc.Graph(id="startup-year")
+                    ])
+                ], className="shadow-sm")
+            ], md=6, className="mb-4"),
+
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Top 5 des entreprises ayant levé le plus de fonds"),
+                    dbc.CardBody([
+                        dcc.Graph(id="top-funded")
                     ])
                 ], className="shadow-sm")
             ], md=6, className="mb-4")

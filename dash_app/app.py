@@ -127,8 +127,6 @@ def total_funding(sector, year_range, effectif):
     if sector:
         df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
     if effectif:
-        if not isinstance(effectif, (list, set, tuple)):  # Vérifier si c'est un type iterable
-            effectif = [effectif]
         df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
     if year_range:
         df_societe = df_societe[
@@ -153,8 +151,6 @@ def update_funding_graph(selected_sectors):
     df = get_dataframe("financements.csv") 
     df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
     df['Année'] = df['Date dernier financement'].dt.year
-    df = df.dropna(subset=["Année"])
-    df["Année"] = df["Année"].astype(int)
     df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
     df_societe = get_dataframe("societes.csv")
     if selected_sectors:
@@ -164,6 +160,188 @@ def update_funding_graph(selected_sectors):
     funding_by_year = df.groupby('Année')['Montant_def'].sum().reset_index()
     fig1 = px.line(funding_by_year, x='Année', y='Montant_def')
     return fig1
+
+@app.callback(
+    Output("serie-funding", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def update_series_graph(sector, year_range, effectif):
+    df = get_dataframe("financements.csv") 
+    df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+    df['Année'] = df['Date dernier financement'].dt.year
+    df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
+    df_societe = get_dataframe("societes.csv")
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[
+            (df_societe["annee_creation"].notna()) &  # Évite les NaN
+            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+    
+    funding_by_series = df["Série"].value_counts().nlargest(10).reset_index()
+    fig2 = px.bar(funding_by_series, x='index', y='Série', title="Répartition des financements par série d'investissement")
+
+    return fig2
+
+@app.callback(
+    Output("startup-year", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def startup_per_year(sector, year_range, effectif):
+    df = get_dataframe("financements.csv") 
+    df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+    df['Année'] = df['Date dernier financement'].dt.year
+    df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
+    df_societe = get_dataframe("societes.csv")
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[
+            (df_societe["annee_creation"].notna()) &  # Évite les NaN
+            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+    
+    startups_by_year = df_societe["annee_creation"].value_counts().reset_index()
+    fig3 = px.line(startups_by_year, x='index', y='annee_creation', title="Nombre de startups créées par année")
+
+    return fig3
+
+@app.callback(
+    Output("top-funded", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def top_funded(sector, year_range, effectif):
+    df = get_dataframe("financements.csv") 
+    df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+    df['Année'] = df['Date dernier financement'].dt.year
+    df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
+    df_societe = get_dataframe("societes.csv")
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[
+            (df_societe["annee_creation"].notna()) &  # Évite les NaN
+            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+    
+    top_funded_companies = df.groupby("entreprise_id")["Montant_def"].sum().nlargest(10).reset_index()
+    top_funded_companies = top_funded_companies.merge(df_societe, on="entreprise_id", how="left")
+    fig4 = px.bar(top_funded_companies, x='nom', y='Montant_def', title="Top 5 des entreprises ayant levé le plus de fonds")
+
+    return fig4
+
+
+@app.callback(
+    Output("pourc-leve", "children"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def pourc_levee(sector, year_range, effectif):
+    df = get_dataframe("financements.csv") 
+    df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+    df['Année'] = df['Date dernier financement'].dt.year
+    df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
+    df_societe = get_dataframe("societes.csv")
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[
+            (df_societe["annee_creation"].notna()) &  # Évite les NaN
+            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+    
+    # Calcul de la part des entreprises ayant levé des fonds
+    nb_total_entreprises = df_societe.shape[0]
+    nb_entreprises_funded = df["Montant_def"].nunique()
+    part_funded = (nb_entreprises_funded / nb_total_entreprises) * 100
+
+    return f"{part_funded:.2f}%"
+
+
+@app.callback(
+    Output("nbre-startup", "children"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def nbre_startup(sector, year_range, effectif):
+    df = get_dataframe("financements.csv") 
+    df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
+    df['Année'] = df['Date dernier financement'].dt.year
+    df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
+    df_societe = get_dataframe("societes.csv")
+    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
+
+    # Appliquer les filtres
+    if sector:
+        df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
+    if effectif:
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
+        df_societe = df_societe[
+            (df_societe["annee_creation"].notna()) &  # Évite les NaN
+            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
+    
+    # Calcul du nbre de startups uniques
+    nbre_start = df_societe['nom'].nunique()
+
+    return f"{nbre_start}"
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
