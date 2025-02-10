@@ -2,6 +2,9 @@ import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
+
+################################################################################ LAYOUT ################################################################################
+
 layout = html.Div([
     # Hero Section avec image de fond et overlay
     html.Div([

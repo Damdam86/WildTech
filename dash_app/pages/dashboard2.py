@@ -5,7 +5,7 @@ import pandas as pd
 from app import get_dataframe  # Importer app et la fonction get_dataframe
 import plotly.express as px
 
-# Chargement des données
+################################################################################# CHARGEMENT DONNEES ##############################################################
 df_societe = get_dataframe('societes.csv')
 df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
 df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extrait uniquement l'année
@@ -19,11 +19,9 @@ df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], 
 df['Année'] = df['Date dernier financement'].dt.year
 df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0)
 
-#Graphs
-funding_by_year = df.groupby('Année')['Montant_def'].sum().reset_index()
-fig1 = px.line(funding_by_year, x='Année', y='Montant_def')
 
-#Layout
+################################################################################ LAYOUT ###############################################################################
+
 layout = html.Div([
     # Section Header
     html.Div([
@@ -42,7 +40,7 @@ layout = html.Div([
         dbc.Card([
     dbc.CardBody([
         dbc.Row([
-            # Colonne 1 : Activité principale
+            # Filtre Activité principale
             dbc.Col([
                 html.Label("Activité principale", className="text-muted mb-2"),
                 dcc.Dropdown(
@@ -54,7 +52,7 @@ layout = html.Div([
                 )
             ], md=4),
 
-            # Colonne 2 : Année de Création
+            # Filtre Année de Création
             dbc.Col([
                 html.Label("Année de Création", className="text-muted mb-2"),
                 dcc.RangeSlider(
@@ -67,13 +65,14 @@ layout = html.Div([
                 )
             ], md=4),
 
-            # Colonne 3 : Taille d'effectif
+            # Filtre Taille d'effectif
             dbc.Col([
                 html.Label("Taille d'effectif", className="text-muted mb-2"),
                 dcc.Dropdown(
                     id="effectif-filter",
                     options=[{"label": effectif, "value": effectif} for effectif in df_societe["Effectif_def"].dropna().unique()],
                     placeholder="Toutes les tailles",
+                    multi=True,
                     className="mb-3"
                 )
             ], md=4)
@@ -82,6 +81,8 @@ layout = html.Div([
 ], className="shadow-sm mb-4"),
 
         # KPI Cards
+
+        # Graph Financement total
         dbc.Row([
             dbc.Col([
                 dbc.Card([
@@ -97,6 +98,8 @@ layout = html.Div([
                 ], className="shadow-sm")
             ], md=3, className="mb-4"),  
 
+        # Graph Financement moyen par société
+
             dbc.Col([
                 dbc.Card([
                     dbc.CardBody([
@@ -110,6 +113,8 @@ layout = html.Div([
                     ])
                 ], className="shadow-sm")
             ], md=3, className="mb-4"),  
+
+        # Graph de nbre de création de sociétés 
 
             dbc.Col([
                 dbc.Card([

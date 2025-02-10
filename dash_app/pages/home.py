@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 df = get_dataframe('societes.csv')
 
 
-#Recommandation
+######################################################################## Recommandation ########################################################################
 
 # Prépration des données pour KNN
 keywords_dummies = df['mots_cles_def'].str.get_dummies(sep=', ')
@@ -28,7 +28,7 @@ pipeline.fit(X_extended)
 
 # Fonction de recommandation
 def recommend_societes(selected_startup, data, X_extended, pipeline):
-    """ Recommande 10 startups similaires à partir des mots-clés et activités. """
+    #Recommande 10 startups similaires à partir des mots-clés et activités.
     if selected_startup not in data['nom'].values:
         return []
 
@@ -44,6 +44,7 @@ def recommend_societes(selected_startup, data, X_extended, pipeline):
     return voisins[['nom', 'description', 'logo','mots_cles_def', 'market', 'Activité principale', 'Distance']]
 
 
+################################################################################ LAYOUT ################################################################################
 layout = dbc.Container([
 
     # Hero Section avec image de fond et overlay
@@ -102,7 +103,7 @@ def update_startup_info(selected_startup):
 
     startup_data = df[df["nom"] == selected_startup].iloc[0]
 
-    # 📌 **Affichage des détails de la startup sélectionnée**
+    # Affichage des détails de la startup sélectionnée
     startup_card = dbc.Row([
         dbc.Col(dbc.Card([
             dbc.CardBody([
@@ -129,7 +130,7 @@ def update_startup_info(selected_startup):
         ], className="tech-card"), width=4)
     ], className="g-4")
 
-    # 📌 **Recommandations**
+    # Affichage des recommandations
     recommended = recommend_societes(selected_startup, df, X_extended, pipeline)
     recommended_cards = []
     for _, row in recommended.iterrows():
