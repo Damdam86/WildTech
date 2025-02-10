@@ -40,7 +40,7 @@ layout = html.Div([
                         "Retrouvez les startups proches de chez vous.",
                         className="hero-subtitle mb-4"
                     ),
-                ], md=8, lg=6)
+                ], md=8, lg=8)
             ], className="min-vh-75 align-items-center")
         ], fluid=True)
     ], className="hero-section mb-5"),

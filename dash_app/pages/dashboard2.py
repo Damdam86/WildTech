@@ -176,7 +176,7 @@ layout = html.Div([
 
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader("Top 5 des entreprises ayant levé le plus de fonds"),
+                    dbc.CardHeader("Top 10 des entreprises ayant levé le plus de fonds"),
                     dbc.CardBody([
                         dcc.Graph(id="top-funded")
                     ])

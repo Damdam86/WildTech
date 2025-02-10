@@ -107,7 +107,7 @@ def mean_funding(sector, year_range, effectif):
 
 
 @app.callback(
-    Output("total-funding", "children"),  
+    Output("total-funding", "children"),
     [
         Input('sector-filter', 'value'),
         Input('year-filter', 'value'),
@@ -120,7 +120,9 @@ def total_funding(sector, year_range, effectif):
 
     # Conversion des colonnes
     df['Montant_def'] = pd.to_numeric(df['Montant_def'], errors='coerce')  
-    df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
+    df_societe['date_creation_def'] = pd.to_datetime(
+        df_societe['date_creation_def'], 
+        errors="coerce")
     df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # ✅ Extraire l'année
 
     # Appliquer les filtres
@@ -203,11 +205,11 @@ def update_series_graph(sector, year_range, effectif):
     if year_range:
         df_societe = df_societe[
             (df_societe["annee_creation"].notna()) &  # Évite les NaN
-            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+            (df_societe["annee_creation"].between(year_range[0], year_range[1])
+             )
         ]
 
     df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
-    
     funding_by_series = df["Série"].value_counts().nlargest(10).reset_index()
     fig2 = px.bar(funding_by_series, x='index', y='Série')
 
@@ -241,9 +243,7 @@ def startup_per_year(sector, year_range, effectif):
             (df_societe["annee_creation"].between(year_range[0], year_range[1]))
         ]
 
-    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
-    
-    #startups_by_year = df_societe["annee_creation"].value_counts().reset_index()
+    df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]  
     startups_by_year = df_societe.groupby('annee_creation').agg({'entreprise_id': 'count'}).reset_index()
     startups_by_year.columns = ['annee_creation', 'nombre_startups'] 
 
