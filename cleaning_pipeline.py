@@ -303,54 +303,91 @@ def to_missing(df):
 
 @task
 def clean_effectif(merged_df):
-    # Converti les différentes valeurs dans effectifs https://entreprise.api.gouv.fr/catalogue/insee/etablissements
-    dictio_effectif = {
-    0: '0 salarié',
-    1: '1 ou 2 salariés',
-    2: '3 à 5 salariés',
-    3: '6 à 9 salariés',
-    11: '10 à 19 salariés',
-    12: '20 à 49 salariés',
-    21: '50 à 99 salariés',
-    22: '100 à 199 salariés',
-    31: '200 à 499 salariés',
-    32: '250 à 499 salariés',
-    41: '500 à 999 salariés',
-    42: '1000 à 1999 salariés',
-    51: '2000 à 4999 salariés',
-    52: '5000 salariés ou plus',
-    53: '10 000 salariés et plus',
-    '-': np.nan,
-    '2-10 employees': '3 à 5 salariés',
-    '11-50 employees': '20 à 49 salariés',
-    '51-200 employees': '50 à 99 salariés',
-    '201-500 employees': '200 à 499 salariés',
-    '1 employees': '1 ou 2 salariés',
-    '501-1000 employees': '500 à 999 salariés',
-    '1001-5000 employees': '1000 à 1999 salariés',
-    '10001+ employees': '5000 salariés ou plus',
-    '5001-10000 employees': '5000 salariés ou plus',
-    'NN': 'Effectif inconnu'
-}
-    def simple_map(cell):
-        # Si la cellule est une liste, on prend le premier élément
-        if isinstance(cell, list):
-            cell = cell[0]
-        # Tente de convertir la valeur en entier et applique le mapping si possible
-        try:
-            key = int(cell)
-            if key in dictio_effectif:
-                return dictio_effectif[key]
-        except Exception:
-            # Si la conversion échoue, on vérifie si la valeur (en tant que chaîne) est présente dans le dictionnaire
-            if cell in dictio_effectif:
-                return dictio_effectif[cell]
-        # Retourne la valeur originale si aucun mapping n'a été trouvé
-        return cell
+    """ Nettoie et standardise la colonne Effectif_def en conservant toujours la plus grande valeur. """
+
+    # Définition du classement des tranches d'effectifs
+    effectif_order = {
+        "0 salarié": 0,
+        "1 ou 2 salariés": 1,
+        "3 à 5 salariés": 2,
+        "6 à 9 salariés": 3,
+        "10 à 19 salariés": 4,
+        "20 à 49 salariés": 5,
+        "50 à 99 salariés": 6,
+        "100 à 199 salariés": 7,
+        "200 à 499 salariés": 8,
+        "500 à 999 salariés": 9,
+        "1000 à 1999 salariés": 10,
+        "2000 à 4999 salariés": 11,
+        "5000 salariés ou plus": 12,
+        "10 000 salariés et plus": 13,
+        "Effectif inconnu": -1
+    }
+
+    # Traduction des effectifs de l'anglais vers le français
+    effectif_translation = {
+        '2-10 employees': "3 à 5 salariés",
+        '11-50 employees': "20 à 49 salariés",
+        '51-200 employees': "50 à 99 salariés",
+        '201-500 employees': "200 à 499 salariés",
+        '1 employees': "1 ou 2 salariés",
+        '501-1000 employees': "500 à 999 salariés",
+        '1001-5000 employees': "1000 à 1999 salariés",
+        '10001+ employees': "5000 salariés ou plus",
+        '5001-10000 employees': "5000 salariés ou plus",
+        'NN': "Effectif inconnu"
+    }
+
+    def get_largest_effectif(effectif):
+        """ Sélectionne la plus grande tranche d'effectif en convertissant les valeurs. """
+
+        # 🔹 Gérer les valeurs NaN et vides
+        if pd.isna(effectif) or effectif == [] or effectif == "":
+            return np.nan
+        
+        # 🔹 Toujours transformer en liste pour un traitement uniforme
+        if not isinstance(effectif, list):
+            effectif = [effectif]
+
+        # 🔹 Aplatir les listes imbriquées et convertir en texte
+        flattened = []
+        for item in effectif:
+            if isinstance(item, list):
+                flattened.extend(item)
+            else:
+                flattened.append(str(item).strip())
+
+        cleaned_effectifs = []
+        for e in flattened:
+            # 🔹 Convertir les valeurs anglaises en français
+            if e in effectif_translation:
+                e = effectif_translation[e]
+
+            # 🔹 Convertir les valeurs numériques seules (ex: "11" → "10 à 19 salariés")
+            if e.isdigit():
+                num = int(e)
+                for label, rank in effectif_order.items():
+                    if str(num) in label:
+                        e = label
+                        break
+            
+            # 🔹 Ajouter si reconnu
+            if e in effectif_order:
+                cleaned_effectifs.append(e)
+
+        # 🔹 Retourne la plus grande tranche d'effectif
+        return max(cleaned_effectifs, key=lambda x: effectif_order[x]) if cleaned_effectifs else np.nan
+
+    # ✅ Correction : On force la sortie des listes en valeurs uniques avant d'appliquer la transformation
+    merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
+
+    # 🛠 Appliquer la transformation sur la colonne Effectif_def
+    merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(get_largest_effectif)
+
+    logger.info("✅ Effectifs standardisés et nettoyés en conservant la plus grande tranche.")
     
-    merged_df['Effectif_def'] = merged_df['Effectif_def'].apply(simple_map)
-    
-    logger.info("Effectifs nettoyés")
+    # 🔍 Ajout d'un log pour vérifier la distribution après nettoyage
+    print("🔍 Vérification après clean_effectif :", merged_df["Effectif_def"].value_counts(dropna=False))
 
     return merged_df
 
@@ -422,19 +459,26 @@ def cleaning_funding(merged_df):
 
 @task
 def deduplicate_and_clean(merged_df):
-    """ 
-    Regroupe les lignes avec le même 'nom' et fusionne les valeurs des autres colonnes
-    sans générer de doublons dans chaque colonne.
-    """
-    # Fonction pour fusionner les valeurs uniques d'une colonne en supprimant les doublons
+    #Regroupe les lignes et fusionne les valeurs uniques sans supprimer de colonnes. """
+
     def merge_values(series):
         unique_values = pd.Series(series.dropna().unique())  # Supprime les NaN et garde valeurs uniques
         unique_values = unique_values.apply(str)  # Convertit en string pour éviter les problèmes
         return ", ".join(sorted(set(unique_values))) if not unique_values.empty else None  # Supprime doublons et trie
-    # Regrouper par 'nom' et fusionner les autres colonnes sans doublons
-    merged_df = merged_df.groupby("nom", as_index=False).agg(lambda x: merge_values(x))
+    
+    # Vérifier si "Effectif_def" existe avant le groupby
+    if "Effectif_def" not in merged_df.columns:
+        logger.warning("⚠️ Effectif_def a disparu avant deduplicate_and_clean ! Elle sera recréée vide.")
+        merged_df["Effectif_def"] = np.nan  # Crée une colonne vide si elle n'existe pas
 
-    return merged_df  
+    # Groupby sans perdre "Effectif_def"
+    merged_df = merged_df.groupby("nom", as_index=False).agg(lambda x: merge_values(x) if x.name != "Effectif_def" else x.mode().max())
+
+    print("✅ Vérification après deduplicate_and_clean:", merged_df.columns)  # Vérification
+    print("🔍 Après deduplicate_and_clean :")
+    print(merged_df["Effectif_def"].head(20))
+
+    return merged_df
 
 
 @task
@@ -484,6 +528,25 @@ def clean_keywords_task(merged_df):
         errors='coerce'  # 🔹 Convertit les erreurs en NaT (valeur manquante)
         )
     
+    return merged_df
+
+
+@task
+def new_siren(merged_df):
+    # Charger la table contenant les SIREN
+    missing_siren_df = pd.read_csv("missing_siren_with_siren_complet.csv")
+    # Normaliser les noms en majuscules
+    missing_siren_df["nom"] = missing_siren_df["nom"].astype(str).str.upper()
+    merged_df["nom"] = merged_df["nom"].astype(str).str.upper()
+    # Fusionner sur 'nom' pour récupérer 'SIREN'
+    merged_df = merged_df.merge(missing_siren_df[['nom', 'SIREN']], on='nom', how='left')
+    # Fusionner les colonnes SIREN_x et SIREN_y
+    if "SIREN_x" in merged_df.columns and "SIREN_y" in merged_df.columns:
+        merged_df["SIREN"] = merged_df["SIREN_x"].combine_first(merged_df["SIREN_y"])
+        merged_df.drop(columns=["SIREN_x", "SIREN_y"], inplace=True) 
+    elif "SIREN_y" in merged_df.columns:
+        merged_df.rename(columns={"SIREN_y": "SIREN"}, inplace=True) 
+
     return merged_df
 
 
@@ -557,16 +620,19 @@ def data_pipeline():
     merged_df = cleaning_data2(merged_df)
     # Suppression des valeurs nul / etc. 
     merged_df = to_missing(merged_df)
-    # Standardisation des effectifs 
-    merged_df  = clean_effectif(merged_df)
     # Création des colonnes contacts 
     merged_df = split_contact(merged_df)
     # Cleaning de la partie financement / montants 
     merged_df = cleaning_funding(merged_df)
     # Dédoublonnage !!!!! 
     merged_df = deduplicate_and_clean(merged_df)
+    # Standardisation des effectifs 
+    merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
+    merged_df  = clean_effectif(merged_df)
     #Clean mot clés
     merged_df = clean_keywords_task(merged_df)
+    #Ajout des SIREN de l'API SIREN
+    merged_df = new_siren(merged_df) 
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
