@@ -7,6 +7,7 @@ from prefect.logging import get_logger
 
 logger = get_logger()
 
+
 @task
 def load_data():
     """ Charge les données depuis les fichiers JSON et CSV"""  
@@ -58,13 +59,13 @@ def cleaning_data1(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_sir
     """Nettoie les DataFrames"""
     rename_mappings = {
         'df_bpi': {'name': 'nom', 'hashtags': 'mots_cles_b', 'website': 'site_web'},
-        'df_CESFR': {'Nom': 'nom', 'Description': 'description', 'Catégories': 'mots_cles_y', 
+        'df_CESFR': {'Nom': 'nom', 'Description': 'description', 'Catégories': 'mots_cles_y',
                      'Website': 'site_web_z', 'Adresse': 'adresse_z', 'Logo': 'logo'},
-        'df_maddy': {'Nom': 'nom', 'Description': 'description', 'Site internet': 'site_web', 
+        'df_maddy': {'Nom': 'nom', 'Description': 'description', 'Site internet': 'site_web',
                      'Logo': 'logo', 'Hashtags': 'mots_cles_z'},
         'df_mina': {'name': 'nom', 'Logo': 'logo'},
         'df_viva': {'name': 'nom', 'website': 'site_web_u', 'Logo': 'logo'},
-        'df_pepites' : {'title':'nom', 'adress':'adresse', 'logo_url':'logo', 'website':'site_web_t', 'category':'mots_cles_t'}
+        'df_pepites': {'title': 'nom', 'adress': 'adresse', 'logo_url': 'logo', 'website': 'site_web_t', 'category': 'mots_cles_t'}
     }
 
     for df_name, rename_map in rename_mappings.items():
@@ -122,8 +123,9 @@ def merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, 
     merged_df = pd.merge(merged_df, df_keywords, on=['nom','description','logo'], how='outer')
 
     logger.info("Fusion terminée.")
-    
+
     return merged_df
+
 
 def flatten_address(address):
     """Nettoie et transforme les listes d'adresses en chaînes uniques."""
@@ -139,8 +141,9 @@ def flatten_address(address):
     if isinstance(address, list):  # Vérifie si c'est une liste
         address = [a.strip() for a in address if isinstance(a, str) and a.strip()]  # Supprime les entrées vides et espaces
         return ", ".join(set(address)) if address else None  # Supprime les doublons et convertit en chaîne unique
-    
+
     return address  # Retourne tel quel si ce n'est pas une liste
+
 
 @task
 def cleaning_data2(merged_df):    
@@ -154,7 +157,7 @@ def cleaning_data2(merged_df):
     .groupby(level=0)
     .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
-    
+
     logger.info("Mots clés fusionnés")
 
     # Fusion des effectifs
@@ -189,7 +192,7 @@ def cleaning_data2(merged_df):
     )
     logger.info("Adresses fusionnés")
 
-    
+
     # Fusion des dates de création
     creation_cols = ['Date de création_x', 'date de création','Date de création_y']
     merged_df["date_creation_def"] = (
@@ -215,9 +218,9 @@ def cleaning_data2(merged_df):
 
     logger.info("Adresses nettoyées")
 
-    #Suppression des colonnes
+    # Suppression des colonnes
     merged_df.drop(columns=mots_cles_cols, inplace=True)
-    #merged_df.drop(columns=financement_cols, inplace=True)
+    # merged_df.drop(columns=financement_cols, inplace=True)
     merged_df.drop(columns=site_web_cols, inplace=True)
     merged_df.drop(columns=adresse_cols, inplace=True)
     merged_df.drop(columns=creation_cols, inplace=True)
@@ -225,7 +228,7 @@ def cleaning_data2(merged_df):
     merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags','dernier_financement'], inplace=True)
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
     merged_df = merged_df.applymap(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)  # Remplacer les espaces multiples
-    
+
     logger.info("Colonnes supprimées")
 
     # Fonction de nettoyage adaptée pour gérer à la fois les chaînes et les listes
@@ -245,7 +248,7 @@ def cleaning_data2(merged_df):
 
     # Application de la fonction sur la colonne "mots_cles_def"
     merged_df['mots_cles_def'] = merged_df['mots_cles_def'].apply(clean_mots_cles)
-        
+
     # Fonction pour extraire la date d'une cellule
     def extract_date(cell):
         # Si la cellule est une liste, on renvoie son premier élément
@@ -263,7 +266,7 @@ def cleaning_data2(merged_df):
             except Exception as e:
                 pass
         return cell
-    
+
     logger.info("Mots clés nettoyés")
 
 
@@ -272,7 +275,7 @@ def cleaning_data2(merged_df):
     # Conversion en datetime
     merged_df['date_creation_def'] = pd.to_datetime(merged_df['date_creation_def'], format='%Y-%m-%d', errors='coerce') # errors='coerce' convertit les valeurs incorrectes en NaT
     # On ne recupère que l'année
-    #merged_df['date_creation_def'] = merged_df['date_creation_def'].dt.year
+    # merged_df['date_creation_def'] = merged_df['date_creation_def'].dt.year
 
     # Netoyyage de 'Date dernier financement'
     merged_df['Date dernier financement'] = pd.to_datetime(merged_df['Date dernier financement'], format='%d.%m.%y')
@@ -344,7 +347,7 @@ def clean_effectif(merged_df):
         # 🔹 Gérer les valeurs NaN et vides
         if pd.isna(effectif) or effectif == [] or effectif == "":
             return np.nan
-        
+
         # 🔹 Toujours transformer en liste pour un traitement uniforme
         if not isinstance(effectif, list):
             effectif = [effectif]
@@ -370,7 +373,7 @@ def clean_effectif(merged_df):
                     if str(num) in label:
                         e = label
                         break
-            
+
             # 🔹 Ajouter si reconnu
             if e in effectif_order:
                 cleaned_effectifs.append(e)
@@ -385,7 +388,7 @@ def clean_effectif(merged_df):
     merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(get_largest_effectif)
 
     logger.info("✅ Effectifs standardisés et nettoyés en conservant la plus grande tranche.")
-    
+
     # 🔍 Ajout d'un log pour vérifier la distribution après nettoyage
     print("🔍 Vérification après clean_effectif :", merged_df["Effectif_def"].value_counts(dropna=False))
 
@@ -399,7 +402,7 @@ def split_contact(merged_df):
         if not isinstance(contact, str) or pd.isna(contact):
             # Vous pouvez retourner des valeurs par défaut (par exemple, des chaînes vides)
             return pd.Series({'Nom': '', 'Prenom': '', 'Poste': ''})
-        
+
         # Sépare la chaîne en mots
         parts = contact.split()
         if len(parts) >= 2:
@@ -413,7 +416,7 @@ def split_contact(merged_df):
             prenom = ''
             poste = ''
         return pd.Series({'Nom': nom, 'Prenom': prenom, 'Poste': poste})
-    
+
     # Applique la fonction sur la colonne 'Contact'
     merged_df[['Nom', 'Prenom', 'Poste']] = merged_df['Contact'].apply(split_contact_row)
     merged_df.drop(columns=['Contact'], inplace=True)
@@ -425,7 +428,7 @@ def cleaning_funding(merged_df):
     def convert_montant(value):
         if isinstance(value, str):
             value = value.replace('€', '').replace(',', '.').strip()  # Nettoyage de base
-            
+
             # Détection des unités et conversion manuelle
             if 'M' in value:
                 return round(float(value.replace('M', '')) * 1_000_000)
@@ -441,7 +444,7 @@ def cleaning_funding(merged_df):
 
     # Appliquer la conversion sur chaque valeur de la colonne
     merged_df['Montant_def'] = merged_df['Montant'].apply(convert_montant)
-    
+
     # Conversion en float
     merged_df['Montant_def'] = merged_df['Montant_def'].astype(float)
 
@@ -453,19 +456,15 @@ def cleaning_funding(merged_df):
     return merged_df
 
 
-#@task
-#def fil_type_organisme(merged_df):
-
-
 @task
 def deduplicate_and_clean(merged_df):
-    #Regroupe les lignes et fusionne les valeurs uniques sans supprimer de colonnes. """
+    # Regroupe les lignes et fusionne les valeurs uniques sans supprimer de colonnes."""
 
     def merge_values(series):
         unique_values = pd.Series(series.dropna().unique())  # Supprime les NaN et garde valeurs uniques
         unique_values = unique_values.apply(str)  # Convertit en string pour éviter les problèmes
         return ", ".join(sorted(set(unique_values))) if not unique_values.empty else None  # Supprime doublons et trie
-    
+
     # Vérifier si "Effectif_def" existe avant le groupby
     if "Effectif_def" not in merged_df.columns:
         logger.warning("⚠️ Effectif_def a disparu avant deduplicate_and_clean ! Elle sera recréée vide.")
@@ -491,11 +490,11 @@ def clean_keywords_task(merged_df):
     def process_entry(entry):
         if pd.isna(entry) or entry in ["", "[]"]:  # Gérer les NaN et listes vides
             return None
-        
+
         # 🔹 Convertir les tuples en listes
         if isinstance(entry, tuple):
             entry = list(entry)
-        
+
         # 🔹 Convertir une chaîne qui ressemble à une liste en vraie liste
         if isinstance(entry, str) and entry.startswith("[") and entry.endswith("]"):
             try:
@@ -506,7 +505,7 @@ def clean_keywords_task(merged_df):
         # 🔹 Si ce n'est pas une liste, transformer en liste avec une seule valeur
         if not isinstance(entry, list):
             entry = [entry]
-        
+
         # 🔹 Nettoyage : suppression des espaces et mise en minuscule
         clean_list = sorted(set(str(item).strip().lower() for item in entry if str(item).strip()))
 
@@ -527,7 +526,7 @@ def clean_keywords_task(merged_df):
         format='%Y-%m-%d',  # ⚠️ Adapte ce format à ton jeu de données
         errors='coerce'  # 🔹 Convertit les erreurs en NaT (valeur manquante)
         )
-    
+
     return merged_df
 
 
@@ -543,9 +542,9 @@ def new_siren(merged_df):
     # Fusionner les colonnes SIREN_x et SIREN_y
     if "SIREN_x" in merged_df.columns and "SIREN_y" in merged_df.columns:
         merged_df["SIREN"] = merged_df["SIREN_x"].combine_first(merged_df["SIREN_y"])
-        merged_df.drop(columns=["SIREN_x", "SIREN_y"], inplace=True) 
+        merged_df.drop(columns=["SIREN_x", "SIREN_y"], inplace=True)
     elif "SIREN_y" in merged_df.columns:
-        merged_df.rename(columns={"SIREN_y": "SIREN"}, inplace=True) 
+        merged_df.rename(columns={"SIREN_y": "SIREN"}, inplace=True)
 
     return merged_df
 
@@ -556,13 +555,14 @@ def save_data(df):
     df.to_csv('merged_df.csv', index=False)
     logger.info(f"Données sauvegardées")
 
+
 @task
 def create_database(merged_df):
 
     # Conversion des colonnes susceptibles de contenir des listes en tuples pour éviter des erreurs de hashage
     def make_hashable(x):
         return tuple(x) if isinstance(x, list) else x
-    
+
     cols_to_convert = ['description', 'logo', "Type d'organisme", 'SIREN',
                        'Activité principale', 'Effectif_def', 'market',
                     'mots_cles_def', 'site_web_def', 'adresse_def',
@@ -570,38 +570,58 @@ def create_database(merged_df):
     for col in cols_to_convert:
         if col in merged_df.columns:
             merged_df[col] = merged_df[col].apply(make_hashable)
-    
+
     # Table société avec créaton ID
     societes = merged_df[['nom', 'description', 'logo', "Type d'organisme", 'SIREN', 
                             'Activité principale', 'Effectif_def', 'market', 
                             'mots_cles_def', 'site_web_def', 'adresse_def', 
                             'date_creation_def']].drop_duplicates()
     societes.insert(0, "entreprise_id", range(1, len(societes) + 1))
-    
+
     # Table des Personnes avec entreprise_id et création contact_id
     personnes = merged_df[['nom', 'Nom', 'Prenom', 'Poste']].drop_duplicates()
     personnes = personnes.merge(societes[['nom', 'entreprise_id']], on='nom', how='left')
     personnes = personnes[['entreprise_id', 'Nom', 'Prenom', 'Poste']]
     personnes.insert(0, "contact_id", range(1, len(personnes) + 1))
-    
+
     # Table des Financements avec entreprise_id et création de financement_id
-    financements = merged_df[['nom', 'Date dernier financement', 'Série', 'Montant_def',
-                                'valeur_entreprise']].drop_duplicates()
-    financements = merged_df[['nom', 'Date dernier financement', 'Série', 'Montant_def',
-                                'valeur_entreprise']].drop_duplicates()
+    financements = merged_df[['nom', 'Date dernier financement', 'Série',
+                              'Montant_def', 'valeur_entreprise']].drop_duplicates()
+    financements = merged_df[['nom', 'Date dernier financement', 'Série',
+                              'Montant_def', 'valeur_entreprise']].drop_duplicates()
     financements = financements.merge(societes[['nom', 'entreprise_id']], on='nom', how='left')
-    financements = financements[['entreprise_id', 'Date dernier financement', 'Série', 'Montant_def',
-                                   'valeur_entreprise']]
-    financements = financements[['entreprise_id', 'Date dernier financement', 'Série', 'Montant_def',
-                                   'valeur_entreprise']]
+    financements = financements[['entreprise_id', 'Date dernier financement',
+                                 'Série', 'Montant_def',
+                                'valeur_entreprise']]
+    financements = financements[['entreprise_id', 'Date dernier financement',
+                                 'Série', 'Montant_def',
+                                'valeur_entreprise']]
     financements.insert(0, "financement_id", range(1, len(financements) + 1))
-    
+
     # Sauvegarde des datasets
     societes.to_csv("societes.csv", index=False)
     personnes.to_csv("personnes.csv", index=False)
     financements.to_csv("financements.csv", index=False)
-    
+
     logger.info("Les trois datasets ont été créés.")
+
+
+# Coordonnées GPS des adresse
+@task
+def coord_adress(df_societes, df_adresse):
+    df_societes = pd.read_csv("societes.csv")
+    df_adresse = pd.read_csv("data_adresse_geocoded.csv")
+
+    df_societes = pd.merge(
+        df_societes,
+        df_adresse,
+        on='entreprise_id',
+        how='left')
+    df_societes.to_csv('societes.csv', index=False)
+
+    logger.info("Ajout des longitudes et latitudes")
+
+    return
 
 
 @flow
@@ -628,16 +648,17 @@ def data_pipeline():
     merged_df = deduplicate_and_clean(merged_df)
     # Standardisation des effectifs 
     merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
-    merged_df  = clean_effectif(merged_df)
-    #Clean mot clés
+    merged_df = clean_effectif(merged_df)
+    # Clean mot clés
     merged_df = clean_keywords_task(merged_df)
-    #Ajout des SIREN de l'API SIREN
+    # Ajout des SIREN de l'API SIREN
     merged_df = new_siren(merged_df) 
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
     create_database(merged_df)
-    
+    # Ajout des coordonées GPS
+    df_societes, df_adresse = coord_adress(df_societes, df_adresse)
 
 
 if __name__ == "__main__":
