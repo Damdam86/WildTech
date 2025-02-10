@@ -378,10 +378,10 @@ def clean_effectif(merged_df):
         # 🔹 Retourne la plus grande tranche d'effectif
         return max(cleaned_effectifs, key=lambda x: effectif_order[x]) if cleaned_effectifs else np.nan
 
-    # ✅ Correction : On force la sortie des listes en valeurs uniques avant d'appliquer la transformation
+    # Correction : On force la sortie des listes en valeurs uniques avant d'appliquer la transformation
     merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
 
-    # 🛠 Appliquer la transformation sur la colonne Effectif_def
+    # Appliquer la transformation sur la colonne Effectif_def
     merged_df["Effectif_def"] = merged_df["Effectif_def"].apply(get_largest_effectif)
 
     logger.info("✅ Effectifs standardisés et nettoyés en conservant la plus grande tranche.")
@@ -637,6 +637,7 @@ def data_pipeline():
     save_data(merged_df)
     # Création de la multibase de données
     create_database(merged_df)
+    
 
 
 if __name__ == "__main__":
