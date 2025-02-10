@@ -8,6 +8,5 @@ dash_app/assets/financements.csv
 dash_app/assets/financements.csv
 dash_app/assets/societes.csv
 dash_app/assets/financements.csv
-*.csv
 merged_df.csv
-*.csv
+
