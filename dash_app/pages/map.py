@@ -6,7 +6,6 @@ from app import get_dataframe  # Importer app et la fonction get_dataframe
 import plotly.graph_objects as go
 import plotly.express as px
 
-
 # Chargement des données
 df = get_dataframe('societes_geolocalisees.csv')
 

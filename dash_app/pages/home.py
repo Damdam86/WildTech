@@ -70,7 +70,7 @@ layout = dbc.Container([
         dbc.Col(dbc.Card([
             dbc.CardBody([
                 html.H4("Domaines d'activités", className="metric-label"),
-                html.H2(f"{df.mots_cles_def.nunique()}", className="metric-value")
+                html.H2(f"{df['Activité principale'].nunique()}", className="metric-value")
             ])
         ]), width=4)
     ], justify="center", className="mb-4"),
