@@ -8,16 +8,22 @@ import plotly.express as px
 
 
 # Chargement des données
-df = get_dataframe('societes.csv')
+df = get_dataframe('societes_geolocalisees.csv')
+
+#Moyenne des longitude et lat
+center_lat = df['latitude'].mean()
+center_lon = df['longitude'].mean()
 
 # Création de la fig carte
-fig = px.scatter_mapbox(
-    pd.DataFrame({'lat': [], 'lon': []}),
-    lat="lat",
-    lon="lon",
-    zoom=5,
-    center={"lat": 48.8566, "lon": 2.3522},  # Paris
-)
+if 'latitude' in df.columns and 'longitude' in df.columns:
+    fig = px.scatter_mapbox(
+        df,
+        lat="latitude",
+        lon="longitude",
+        hover_name="nom",
+        hover_data=["adresse_def"],
+        zoom=5,
+        center={"lat": center_lat, "lon": center_lon},)
 
 fig.update_layout(
     title="Carte des Startups",

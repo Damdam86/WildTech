@@ -18,7 +18,7 @@ TIMEOUT = None #cache permanent jusqu'à redémarrage de l'app
 #Chargement des csv
 @cache.memoize(timeout=TIMEOUT)
 def query_all_data():
-    files = ["societes.csv", "financements.csv", "personnes.csv"]  # Liste des fichiers à charger
+    files = ["societes.csv", "financements.csv", "personnes.csv", "societes_geolocalisees.csv"]  # Liste des fichiers à charger
     dataframes = {}
 
     for file in files:
