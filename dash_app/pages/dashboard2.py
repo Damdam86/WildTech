@@ -167,7 +167,7 @@ layout = html.Div([
 
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader("Évolution des Financements"),
+                    dbc.CardHeader("Évolution création de startups par an"),
                     dbc.CardBody([
                         dcc.Graph(id="startup-year")
                     ])

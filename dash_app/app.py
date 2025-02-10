@@ -209,7 +209,7 @@ def update_series_graph(sector, year_range, effectif):
     df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
     
     funding_by_series = df["Série"].value_counts().nlargest(10).reset_index()
-    fig2 = px.bar(funding_by_series, x='index', y='Série', title="Répartition des financements par série d'investissement")
+    fig2 = px.bar(funding_by_series, x='index', y='Série')
 
     return fig2
 
@@ -266,24 +266,25 @@ def top_funded(sector, year_range, effectif):
     df['Montant_def'] = pd.to_numeric(df["Montant_def"], errors='coerce').fillna(0) 
     df_societe = get_dataframe("societes.csv")
     df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
-    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  #Extraire l'année
 
     # Appliquer les filtres
     if sector:
         df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
     if effectif:
-        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]  # Comparaison directe
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]  #Comparaison directe
     if year_range:
         df_societe = df_societe[
             (df_societe["annee_creation"].notna()) &  # Évite les NaN
-            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+            (df_societe["annee_creation"].between(year_range[0], year_range[1])
+             )
         ]
 
     df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
     
     top_funded_companies = df.groupby("entreprise_id")["Montant_def"].sum().nlargest(10).reset_index()
     top_funded_companies = top_funded_companies.merge(df_societe, on="entreprise_id", how="left")
-    fig4 = px.bar(top_funded_companies, x='nom', y='Montant_def', title="Top 5 des entreprises ayant levé le plus de fonds")
+    fig4 = px.bar(top_funded_companies, x='nom', y='Montant_def')
 
     return fig4
 
@@ -313,7 +314,8 @@ def pourc_levee(sector, year_range, effectif):
     if year_range:
         df_societe = df_societe[
             (df_societe["annee_creation"].notna()) &  # Évite les NaN
-            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+            (df_societe["annee_creation"].between(year_range[0], year_range[1])
+             )
         ]
 
     df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
@@ -360,7 +362,6 @@ def nbre_startup(sector, year_range, effectif):
     nbre_start = df_societe['nom'].nunique()
 
     return f"{nbre_start}"
-
 
 
 if __name__ == '__main__':
