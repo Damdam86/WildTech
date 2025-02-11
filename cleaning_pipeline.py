@@ -399,27 +399,44 @@ def clean_effectif(merged_df):
 def split_contact(merged_df):
     def split_contact_row(contact):
         # Vérifie si contact est une chaîne valide
-        if not isinstance(contact, str) or pd.isna(contact):
-            # Vous pouvez retourner des valeurs par défaut (par exemple, des chaînes vides)
-            return pd.Series({'Nom': '', 'Prenom': '', 'Poste': ''})
+        if not isinstance(contact, str) or pd.isna(contact) or contact.strip() == "":
+            return pd.DataFrame(columns=['Prenom', 'Nom', 'Poste'])
 
-        # Sépare la chaîne en mots
-        parts = contact.split()
-        if len(parts) >= 2:
-            nom = parts[0].upper()  # le nom en majuscules
-            prenom = parts[1]
-            # Tous les mots à partir du troisième vont dans 'Poste'
-            poste = " ".join(parts[2:]) if len(parts) > 2 else ''
-        else:
-            # Si la chaîne ne comporte pas au moins deux mots
-            nom = contact.upper()
-            prenom = ''
-            poste = ''
-        return pd.Series({'Nom': nom, 'Prenom': prenom, 'Poste': poste})
+        # Séparation des dirigeants multiples en fonction du délimiteur `/`
+        dirigeants = [dir.strip() for dir in contact.split("/") if dir.strip()]
 
-    # Applique la fonction sur la colonne 'Contact'
-    merged_df[['Nom', 'Prenom', 'Poste']] = merged_df['Contact'].apply(split_contact_row)
-    merged_df.drop(columns=['Contact'], inplace=True)
+        # Liste pour stocker les dirigeants formatés
+        formatted_contacts = []
+
+        for dir in dirigeants:
+            parts = dir.split()
+            if len(parts) >= 2:
+                prenom = parts[0]  # Prénom = premier mot
+                nom = " ".join(parts[1:]).upper()  # Nom = tout sauf le premier mot
+            else:
+                prenom = parts[0]  # Si un seul mot → considéré comme prénom
+                nom = ''
+
+            # Vérifier si "Poste" est vide et ajouter "Dirigeant" seulement si c'est le cas
+            poste = "Dirigeant" if not nom and not prenom else ''
+
+            formatted_contacts.append({'Prenom': prenom, 'Nom': nom, 'Poste': poste})
+
+        # Convertir en DataFrame
+        return pd.DataFrame(formatted_contacts)
+
+    # Applique la fonction sur chaque ligne et concatène les résultats
+    contacts_df = merged_df['Contact'].apply(split_contact_row)
+
+    # Certains résultats sont des DataFrames → Les fusionner en un seul
+    contacts_df = pd.concat(contacts_df.to_list(), ignore_index=True)
+
+    # Suppression des colonnes existantes pour éviter les doublons
+    merged_df = merged_df.drop(columns=['Contact', 'Nom', 'Prenom', 'Poste'], errors='ignore').reset_index(drop=True)
+
+    # Concaténation propre des nouvelles colonnes
+    merged_df = pd.concat([merged_df, contacts_df], axis=1)
+
     return merged_df
 
 
@@ -550,6 +567,66 @@ def new_siren(merged_df):
 
 
 @task
+def merge_new_data(merged_df):
+    # Charger les nouvelles données
+    entreprises_completes = pd.read_csv("entreprises_completes.csv", dtype=str)
+
+    # Normaliser la colonne SIREN pour éviter les erreurs de fusion
+    merged_df["SIREN"] = merged_df["SIREN"].astype(str)
+    entreprises_completes["SIREN"] = entreprises_completes["SIREN"].astype(str)
+
+    # Mapping des colonnes à mettre à jour
+    update_columns = {
+        "adresse_def": "Adresse complète",
+        "date_creation_def": "Date de création",
+        "Activité principale": "Code NAF",
+        "Type d'organisme": "Catégorie entreprise",
+        "Contact": "Dirigeant principal"
+    }
+
+    # Colonnes à ajouter
+    new_columns = ["SIRET", "Date de fermeture", "Coordonnée Lambert X", "Coordonnée Lambert Y"]
+
+    # Colonnes à supprimer après fusion
+    columns_to_drop = [
+        "Unnamed: 0", "market_new",  # Ajout des nouvelles colonnes à supprimer
+        "Numéro de voie", "Type de voie", "Nom de la voie", "Code postal", "Commune",
+        "Effectif salarié", "Montant_def_new", "description_new", "logo_new",
+        "nom_new", "Date dernier financement_new", "Série_new", "LinkedIn_new",
+        "Type d'organisme_new", "Activité principale_new", "valeur_entreprise_new",
+        "mots_cles_def_new", "Effectif_def_new", "site_web_def_new", "adresse_def_new",
+        "date_creation_def_new"
+    ]
+
+    # Fusionner les deux DataFrames
+    merged_df = merged_df.merge(
+        entreprises_completes,
+        on="SIREN",
+        how="left",
+        suffixes=("", "_new")  # Ajoute "_new" aux colonnes en double
+    )
+
+    # Mise à jour des colonnes existantes avec les nouvelles valeurs
+    for col_merged, col_complete in update_columns.items():
+        if col_complete in merged_df.columns:
+            merged_df[col_merged] = merged_df[col_complete].combine_first(merged_df[col_merged])
+            merged_df.drop(columns=[col_complete], inplace=True)
+
+    # Ajout des nouvelles colonnes
+    for col in new_columns:
+        if col in merged_df.columns:
+            merged_df.rename(columns={col: col}, inplace=True)  # Assure leur présence
+
+    # Suppression des colonnes dupliquées
+    existing_columns_to_drop = [col for col in columns_to_drop if col in merged_df.columns]
+    merged_df.drop(columns=existing_columns_to_drop, inplace=True, errors='ignore')
+
+    logger.info(f"Fusion avec les nouvelles données effectuée. Colonnes supprimées : {existing_columns_to_drop}")
+
+    return merged_df
+
+
+@task
 def save_data(df):
     """Sauvegarde la merged_df en CSV"""
     df.to_csv('merged_df.csv', index=False)
@@ -572,10 +649,10 @@ def create_database(merged_df):
             merged_df[col] = merged_df[col].apply(make_hashable)
 
     # Table société avec créaton ID
-    societes = merged_df[['nom', 'description', 'logo', "Type d'organisme", 'SIREN', 
-                            'Activité principale', 'Effectif_def', 'market', 
-                            'mots_cles_def', 'site_web_def', 'adresse_def', 
-                            'date_creation_def']].drop_duplicates()
+    societes = merged_df[['nom', 'description', 'logo', "Type d'organisme", 'SIREN',
+                            'Activité principale', 'Effectif_def', 'market',
+                            'mots_cles_def', 'site_web_def', 'adresse_def',
+                            'date_creation_def','SIRET','Date de fermeture','Coordonnée Lambert X','Coordonnée Lambert Y']].drop_duplicates()
     societes.insert(0, "entreprise_id", range(1, len(societes) + 1))
 
     # Table des Personnes avec entreprise_id et création contact_id
@@ -605,17 +682,17 @@ def create_database(merged_df):
 
     logger.info("Les trois datasets ont été créés.")
 
+    return societes, personnes, financements
 
 # Coordonnées GPS des adresse
 @task
-def coord_adress(df_societes, df_adresse):
-    df_societes = pd.read_csv("societes.csv")
+def coord_adress():
+    df_societes = pd.read_csv('societes.csv')
     df_adresse = pd.read_csv("data_adresse_geocoded.csv")
-
     df_societes = pd.merge(
         df_societes,
         df_adresse,
-        on='entreprise_id',
+        on='SIREN',
         how='left')
     df_societes.to_csv('societes.csv', index=False)
 
@@ -640,8 +717,6 @@ def data_pipeline():
     merged_df = cleaning_data2(merged_df)
     # Suppression des valeurs nul / etc. 
     merged_df = to_missing(merged_df)
-    # Création des colonnes contacts 
-    merged_df = split_contact(merged_df)
     # Cleaning de la partie financement / montants 
     merged_df = cleaning_funding(merged_df)
     # Dédoublonnage !!!!! 
@@ -653,13 +728,16 @@ def data_pipeline():
     merged_df = clean_keywords_task(merged_df)
     # Ajout des SIREN de l'API SIREN
     merged_df = new_siren(merged_df) 
+    # Ajout des SIREN de l'API SIREN 2
+    merged_df = merge_new_data(merged_df)
+     # Création des colonnes contacts 
+    merged_df = split_contact(merged_df)
     # Sauvegarde
     save_data(merged_df)
     # Création de la multibase de données
-    create_database(merged_df)
+    df_societes, df_personnes, df_financements = create_database(merged_df)
     # Ajout des coordonées GPS
-    df_societes, df_adresse = coord_adress(df_societes, df_adresse)
-
+    #coord_adress()
 
 if __name__ == "__main__":
     data_pipeline()
