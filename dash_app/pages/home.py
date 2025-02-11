@@ -150,5 +150,6 @@ layout = dbc.Container([
     html.Br(),
     html.H2("Ces sociétés peuvent vous interesser :", className="section-title text-center mb-5"),    
     html.Div(id="recommended-startups", className="mt-5"),
+    html.Br(),
 
 ], fluid=True)

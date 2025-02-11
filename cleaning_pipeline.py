@@ -687,7 +687,7 @@ def create_database(merged_df):
 # Coordonnées GPS des adresse
 @task
 def coord_adress(df_societes):
-    df_societes = pd.read_csv("societes.csv")
+    df_societes = pd.read_csv("./dash_app/assets/societes.csv")
     df_adresse = pd.read_csv("./dash_app/assets/societes_geolocalisees.csv")
 
     #Fusion des latitude et longitude dans societe.csv
@@ -696,7 +696,7 @@ def coord_adress(df_societes):
     #Remplacer les valeurs  valeurs manquantes des coordonnées lambert X par lat et Y par long
     df_societes['Coordonnée Lambert X'].fillna(df_societes['latitude'], inplace=True)
     df_societes['Coordonnée Lambert Y'].fillna(df_societes['longitude'], inplace=True)
-
+    df_societes.drop(columns=['latitude', 'longitude'], inplace=True)
     df_societes.to_csv("./dash_app/assets/societes.csv", index=False)
 
     return
