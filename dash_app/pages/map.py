@@ -7,18 +7,18 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 # Chargement des données
-df = get_dataframe('societes_geolocalisees.csv')
+df = get_dataframe('societes.csv')
 
 #Moyenne des longitude et lat
-center_lat = df['latitude'].mean()
-center_lon = df['longitude'].mean()
+center_lat = df['Coordonnée Lambert X'].mean()
+center_lon = df['Coordonnée Lambert Y'].mean()
 
 # Création de la fig carte
-if 'latitude' in df.columns and 'longitude' in df.columns:
+if 'Coordonnée Lambert X' in df.columns and 'Coordonnée Lambert Y' in df.columns:
     fig = px.scatter_mapbox(
         df,
-        lat="latitude",
-        lon="longitude",
+        lat="Coordonnée Lambert X",
+        lon="Coordonnée Lambert Y",
         hover_name="nom",
         hover_data=["adresse_def"],
         zoom=5,
