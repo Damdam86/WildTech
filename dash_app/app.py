@@ -66,9 +66,9 @@ def display_page(pathname):
     elif pathname == '/projet':
         return projet.layout
     elif pathname == '/equipe':
-        return projet.layout
+        return equipe.layout
     elif pathname == '/amelioration':
-        return projet.layout
+        return amelioration.layout
     elif pathname == '/map':
         return map.layout
     else:
