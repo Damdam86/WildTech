@@ -83,7 +83,7 @@ def mean_funding(sector, year_range, effectif):
     # Charger les données sociétés pour le filtre sur l'activité et l'effectif
     df_societe = get_dataframe("societes.csv")
     df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
-    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # ✅ Extraire l'année
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # Extraire l'année
 
     # Appliquer les filtres
     if sector:
@@ -123,16 +123,16 @@ def total_funding(sector, year_range, effectif):
     df_societe['date_creation_def'] = pd.to_datetime(
         df_societe['date_creation_def'], 
         errors="coerce")
-    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  # ✅ Extraire l'année
+    df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year  #Extraire l'année
 
     # Appliquer les filtres
     if sector:
         df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
     elif effectif:
-        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)] 
     elif year_range:
         df_societe = df_societe[
-            (df_societe["annee_creation"].notna()) &  # ✅ Évite les NaN
+            (df_societe["annee_creation"].notna()) &  # évite les NaN
             (df_societe["annee_creation"].between(year_range[0], year_range[1]))
         ]
 
@@ -163,14 +163,15 @@ def update_funding_graph(sector, year_range, effectif):
     df_societe['date_creation_def'] = pd.to_datetime(df_societe['date_creation_def'], errors="coerce")
     df_societe["annee_creation"] = df_societe["date_creation_def"].dt.year 
 
+    # Appliquer les filtres
     if sector:
         df_societe = df_societe[df_societe["Activité principale"].isin(sector)]
-    elif effectif:
-        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)] 
-    elif year_range:
+    if effectif:
+        df_societe = df_societe[df_societe["Effectif_def"].isin(effectif)]
+    if year_range:
         df_societe = df_societe[
-            (df_societe["annee_creation"].notna()) &  # évite les NaN
-            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+            (df["Année"].notna()) &  # Évite les NaN
+            (df["Année"].between(year_range[0], year_range[1]))
         ]
 
     # Filtre sur les financements en fonction des sociétés sélectionnées
@@ -178,6 +179,7 @@ def update_funding_graph(sector, year_range, effectif):
 
     funding_by_year = df.groupby('Année')['Montant_def'].sum().reset_index()
     fig1 = px.line(funding_by_year, x='Année', y='Montant_def')
+
     return fig1
 
 @app.callback(
@@ -240,7 +242,7 @@ def startup_per_year(sector, year_range, effectif):
     if year_range:
         df_societe = df_societe[
             (df_societe["annee_creation"].notna()) &  # Évite les NaN
-            (df_societe["annee_creation"].between(year_range[0], year_range[1]))
+            (df_societe["annee_creation"].between(1986, year_range[1]))
         ]
 
     df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]  
@@ -366,3 +368,5 @@ def nbre_startup(sector, year_range, effectif):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+

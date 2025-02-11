@@ -54,7 +54,7 @@ layout = html.Div([
 
             # Filtre Année de Création
             dbc.Col([
-                html.Label("Année de Création", className="text-muted mb-2"),
+                html.Label("Année de Création ou de financement", className="text-muted mb-2"),
                 dcc.RangeSlider(
                     id="year-filter",
                     min=1986,  
@@ -106,7 +106,7 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span(id="mean-funding", className="metric-value"),
-                                html.Span("€", className="metric-symbol")
+                                html.Span(className="metric-symbol")
                             ], className="metric-number"),
                             html.P("Financement Moyen par entreprise", className="metric-label")
                         ], className="metric-card")
@@ -122,7 +122,7 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span(id="nbre-startup", className="metric-value"),
-                                html.Span("", className="metric-symbol")
+                                html.Span(className="metric-symbol")
                             ], className="metric-number"),
                             html.P("startups créées", className="metric-label")
                         ], className="metric-card")
@@ -136,7 +136,7 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span(id="pourc-leve", className="metric-value"),
-                                html.Span("%", className="metric-symbol")
+                                html.Span(className="metric-symbol")
                             ], className="metric-number"),
                             html.P("Des entreprises ont levé des fonds", className="metric-label")
                         ], className="metric-card")
