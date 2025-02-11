@@ -104,23 +104,23 @@ def cleaning_data1(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_sir
 def merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft, df_keywords):
     """Fusionne les DataFrames"""
     # Fusion df_bpi et df_tech
-    merged_df = pd.merge(df_bpi, df_tech, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(df_bpi, df_tech, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_maddy
-    merged_df = pd.merge(merged_df, df_maddy, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_maddy, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_CESFR
-    merged_df = pd.merge(merged_df, df_CESFR, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_CESFR, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_mina
-    merged_df = pd.merge(merged_df, df_mina, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_mina, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_viva
-    merged_df = pd.merge(merged_df, df_viva, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_viva, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_siren
     merged_df = pd.merge(merged_df, df_siren, on=['nom'], how='outer')
     # Fusion de la merge avec df_pepites
-    merged_df = pd.merge(merged_df, df_pepites, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_pepites, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_ft
-    merged_df = pd.merge(merged_df, df_ft, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_ft, on=['nom', 'description', 'logo'], how='outer')
     # Fusion de la merge avec df_ft
-    merged_df = pd.merge(merged_df, df_keywords, on=['nom','description','logo'], how='outer')
+    merged_df = pd.merge(merged_df, df_keywords, on=['nom', 'description', 'logo'], how='outer')
 
     logger.info("Fusion terminée.")
 
@@ -150,12 +150,13 @@ def cleaning_data2(merged_df):
     """Nettoie les DataFrames aprés merge"""
 
     # Fusion des mots clés
-    mots_cles_cols = ['mots_cles_z','mots_cles_x','mots_cles_y','mots_cles_a','product_types','sectors','mots_cles_b','mots_cles_t','mots_cles_ft','Marché','Field_1','Field_2','Field_3']
+    mots_cles_cols = ['mots_cles_z', 'mots_cles_x', 'mots_cles_y', 'mots_cles_a', 'product_types', 'sectors',
+                      'mots_cles_b', 'mots_cles_t', 'mots_cles_ft', 'Marché', 'Field_1', 'Field_2', 'Field_3']
     merged_df["mots_cles_def"] = (
-    merged_df[mots_cles_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+        merged_df[mots_cles_cols]
+        .stack()
+        .groupby(level=0)
+        .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
 
     logger.info("Mots clés fusionnés")
@@ -163,43 +164,42 @@ def cleaning_data2(merged_df):
     # Fusion des effectifs
     effectifs_cols = ['Tranche effectifs', 'employees']
     merged_df["Effectif_def"] = (
-    merged_df[effectifs_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+        merged_df[effectifs_cols]
+        .stack()
+        .groupby(level=0)
+        .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
     logger.info("Effectifs fusionnés")
 
     # Fusion des sites internet
-    site_web_cols = ['site_web', 'site_web_x','site_web_y','site_web_z','site_web_z','site_web_u','site_web_t']
+    site_web_cols = ['site_web', 'site_web_x', 'site_web_y', 'site_web_z', 'site_web_z', 'site_web_u', 'site_web_t']
     merged_df["site_web_def"] = (
-    merged_df[site_web_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+        merged_df[site_web_cols]
+        .stack()
+        .groupby(level=0)
+        .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
     merged_df["site_web_def"] = merged_df["site_web_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
     merged_df["site_web_def"] = merged_df["site_web_def"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else x)
     logger.info("Site web fusionnés")
 
     # Fusion des adresses
-    adresse_cols = ['adresse_z', 'adresse', 'city_x','city_y','Adresse','address']
+    adresse_cols = ['adresse_z', 'adresse', 'city_x', 'city_y', 'Adresse', 'address']
     merged_df["adresse_def"] = (
-    merged_df[adresse_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+        merged_df[adresse_cols]
+        .stack()
+        .groupby(level=0)
+        .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
     logger.info("Adresses fusionnés")
 
-
     # Fusion des dates de création
-    creation_cols = ['Date de création_x', 'date de création','Date de création_y']
+    creation_cols = ['Date de création_x', 'date de création', 'Date de création_y']
     merged_df["date_creation_def"] = (
-    merged_df[creation_cols]
-    .stack()
-    .groupby(level=0)
-    .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
+        merged_df[creation_cols]
+        .stack()
+        .groupby(level=0)
+        .agg(lambda x: list(set(sum((y if isinstance(y, list) else [y] for y in x.dropna()), []))))
     )
     logger.info("Date création fusionnés")
 
@@ -213,7 +213,7 @@ def cleaning_data2(merged_df):
         .replace("nan", pd.NA)  # Convertit 'nan' en NaN réel
         .replace("['']", pd.NA)  # Supprime les listes vides formatées comme string
         .str.replace(r'^[\'"\[]|[\'"\]]$', '', regex=True)  # Supprime quotes et crochets
-        .str.strip()  # Supprime les espaces inutiles 
+        .str.strip()  # Supprime les espaces inutiles
         )
 
     logger.info("Adresses nettoyées")
@@ -225,7 +225,7 @@ def cleaning_data2(merged_df):
     merged_df.drop(columns=adresse_cols, inplace=True)
     merged_df.drop(columns=creation_cols, inplace=True)
     merged_df.drop(columns=effectifs_cols, inplace=True)
-    merged_df.drop(columns=['emplacement','fundraising','Denomination légale','tags','dernier_financement'], inplace=True)
+    merged_df.drop(columns=['emplacement', 'fundraising', 'Denomination légale', 'tags', 'dernier_financement'], inplace=True)
     merged_df = merged_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)  # Supprimer les espaces en début/fin
     merged_df = merged_df.applymap(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)  # Remplacer les espaces multiples
 
@@ -269,7 +269,6 @@ def cleaning_data2(merged_df):
 
     logger.info("Mots clés nettoyés")
 
-
     # Netoyyage de 'date_creation_def'
     merged_df['date_creation_def'] = merged_df['date_creation_def'].apply(extract_date)
     # Conversion en datetime
@@ -281,6 +280,7 @@ def cleaning_data2(merged_df):
     merged_df['Date dernier financement'] = pd.to_datetime(merged_df['Date dernier financement'], format='%d.%m.%y')
 
     return merged_df
+
 
 logger.info("Dates nettoyés")
 
@@ -297,7 +297,9 @@ def to_missing(df):
             return x
         if isinstance(x, list):
             cleaned = [str(item).strip().lower() for item in x if item is not None]
-            if not cleaned or all(val in ["non disponible", "site web non disponible", "description non disponible", "none" ,"Catégorie non disponible"] for val in cleaned):
+            if not cleaned or all(val in ["non disponible", "site web non disponible",
+                                          "description non disponible", "none",
+                                          "Catégorie non disponible"] for val in cleaned):
                 return np.nan
             return x
         return x
@@ -687,19 +689,25 @@ def create_database(merged_df):
 # Coordonnées GPS des adresse
 @task
 def coord_adress(df_societes):
-    df_societes = pd.read_csv("./dash_app/assets/societes.csv")
-    df_adresse = pd.read_csv("./dash_app/assets/societes_geolocalisees.csv")
+    df_adresse = pd.read_csv("./sources/societes_geolocalisees.csv")
 
-    #Fusion des latitude et longitude dans societe.csv
-    df_societes = df_societes.merge(df_adresse[['entreprise_id', 'latitude', 'longitude']],on="entreprise_id", how="left")
+    # Fusion des coordonnées (latitude, longitude) dans `df_societes`
+    df_societes = df_societes.merge(
+        df_adresse[['entreprise_id', 'latitude', 'longitude']],
+        on="entreprise_id",
+        how="left"
+    )
 
-    #Remplacer les valeurs  valeurs manquantes des coordonnées lambert X par lat et Y par long
-    df_societes['Coordonnée Lambert X'].fillna(df_societes['latitude'], inplace=True)
-    df_societes['Coordonnée Lambert Y'].fillna(df_societes['longitude'], inplace=True)
-    df_societes.drop(columns=['latitude', 'longitude'], inplace=True)
+    df_societes['Coordonnée Lambert X'] = df_societes['latitude']  # Remplace entièrement
+    df_societes['Coordonnée Lambert Y'] = df_societes['longitude']  # Remplace entièrement
+
+    # On supprime aprés remplacement
+    df_societes.drop(columns=['Coordonnée Lambert X', 'Coordonnée Lambert Y'], errors='ignore', inplace=True)
+
+    # Sauvegarde du fichier
     df_societes.to_csv("./dash_app/assets/societes.csv", index=False)
 
-    return
+    return df_societes
 
 
 @flow
@@ -710,15 +718,15 @@ def data_pipeline():
     df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft, df_keywords = load_data()
     # Déballage de df_mina
     df_mina = debal_minalogic(df_mina)
-    # Nettoyage des DataFrames 1 
+    # Nettoyage des DataFrames 1
     df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft = cleaning_data1(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft)
     # Fusion des DataFrames
     merged_df = merge_data(df_bpi, df_tech, df_maddy, df_CESFR, df_mina, df_viva, df_siren, df_pepites, df_ft, df_keywords)
     # Nettoyage des DataFrames 2
     merged_df = cleaning_data2(merged_df)
-    # Suppression des valeurs nul / etc. 
+    # Suppression des valeurs nul / etc.
     merged_df = to_missing(merged_df)
-    # Cleaning de la partie financement / montants 
+    # Cleaning de la partie financement / montants
     merged_df = cleaning_funding(merged_df)
     # Dédoublonnage !!!!! 
     merged_df = deduplicate_and_clean(merged_df)
@@ -731,7 +739,7 @@ def data_pipeline():
     merged_df = new_siren(merged_df) 
     # Ajout des SIREN de l'API SIREN 2
     merged_df = merge_new_data(merged_df)
-     # Création des colonnes contacts 
+    # Création des colonnes contacts 
     merged_df = split_contact(merged_df)
     # Sauvegarde
     save_data(merged_df)
@@ -739,6 +747,7 @@ def data_pipeline():
     df_societes, df_personnes, df_financements = create_database(merged_df)
     # Ajout des coordonées GPS
     coord_adress(df_societes)
+
 
 if __name__ == "__main__":
     data_pipeline()

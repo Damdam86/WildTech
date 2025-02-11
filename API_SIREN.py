@@ -3,8 +3,8 @@ import pandas as pd
 import time
 
 # 📌 Charger les données contenant les SIREN
-file_path = "api_siren_final.csv"  # Remplace avec le bon fichier CSV
-df = pd.read_csv(file_path)
+file_path = "merged_df.csv"  # Remplace avec le bon fichier CSV
+df = pd.read_csv(file_path).copy()
 
 # 🔄 Ajouter des colonnes pour stocker les résultats
 columns_to_add = [
@@ -69,11 +69,11 @@ for index, row in df.iterrows():
             df.at[index, key] = value
 
     # 📌 Sauvegarde partielle toutes les 10 entreprises
-    if (index + 1) % 10 == 0:
+    if (index + 1) % 100 == 0:
         df.to_csv(f"partial_data_{index + 1}.csv", index=False)
         print(f"💾 Sauvegarde partielle : partial_data_{index + 1}.csv")
 
 # 📌 Sauvegarde finale
-output_file = "entreprises_completes.csv"
+output_file = "entreprises_completes_v2.csv"
 df.to_csv(output_file, index=False)
 print(f"✅ Fichier final créé : {output_file}")

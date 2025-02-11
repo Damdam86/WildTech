@@ -1,21 +1,53 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-import pandas as pd
-from app import get_dataframe  # Importer app et la fonction get_dataframe
-import plotly.express as px
 
+# Données de l'équipe
+team_members = [
+    {"name": "Manon", "git": "https://github.com/Damdam86", "role": "La scrapeuse", "image": "./assets/Manon.png"},
+    {"name": "Farid", "git": "git adresse", "role": "Le plotlyste", "image": "./assets/Farid.png"},
+    {"name": "Nathalie", "git": "git adresse", "role": "La SIREN", "image": "./assets/Nathalie.png"},
+    {"name": "Damien", "git": "git adresse", "role": "La pipelette", "image": "./assets/Damien.png"},
+]
+
+# Les cartes de l'équipe
+team_cards = [
+    dbc.Col(
+        dbc.Card(
+            [
+                dbc.CardImg(src=member["image"], top=True, className="rounded-circle mx-auto d-block",
+                            style={"width": "150px", "height": "150px"}),
+                dbc.CardBody(
+                    [
+                        html.H5(member["name"], className="text-center"),
+                        html.P(member["role"], className="text-center text-muted"),
+                        html.A("GitHub", href=member["git"], target="_blank", className="d-block text-center text-primary"),
+                    ]
+                ),
+            ],
+            className="metric-value",
+            style={"border-radius": "10px", "overflow": "hidden"}
+        ),
+        md=3
+    )
+    for member in team_members
+]
 
 layout = html.Div([
     
     html.Div([ 
+        dbc.Container([
+            dbc.Row([
+                dbc.Col([
+                    html.H1("Equipe", className="hero-title mb-4"),
+                    html.H5("Meet the StartHub team", className="hero-subtitle mb-4")
+                ], md=12)
+            ], className="min-vh-75 align-items-center")
+        ], fluid=True)
+    ], className="hero-section mb-5"),
+
+    # Section des vignettes
     dbc.Container([
-        dbc.Row([
-            dbc.Col([
-                html.H1("Equipe", className="hero-title mb-4"),
-                html.H5("Analyse du financement de l'écosystème startup français", className="hero-subtitle mb-4")
-            ], md=8, lg=6)
-        ], className="min-vh-75 align-items-center")
+        dbc.Row(team_cards, className="justify-content-center")
     ], fluid=True)
-], className="hero-section mb-5")
 ])
