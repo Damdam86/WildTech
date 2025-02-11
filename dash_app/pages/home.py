@@ -10,6 +10,67 @@ from sklearn.pipeline import Pipeline
 df = get_dataframe('societes.csv')
 
 
+# Callback pour mettre à jour les informations de la startup sélectionnée
+@callback(
+    [Output("startup-info", "children"),
+     Output("recommended-startups", "children")],
+    [Input("df-dropdown", "value")]
+)
+def update_startup_info(selected_startup):
+    if not selected_startup:
+        return "", ""
+
+    startup_data = df[df["nom"] == selected_startup].iloc[0]
+
+    # Affichage des détails de la startup sélectionnée
+    startup_card = dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardBody([
+                html.Img(src=startup_data["logo"], style={"width": "150px", "margin": "0 auto", "display": "block"}),
+                html.H3(startup_data["nom"], className="text-center mt-3"),
+                html.P(f"Date de création: {startup_data['date_creation_def']}", className="text-center"),
+                html.P(f"Date de fermeture: {startup_data['Date de fermeture']}", className="text-center"),
+                html.P(f"SIRET: {startup_data['SIRET']}", className="text-center"),
+                html.P(f"Marché: {startup_data['market']}", className="text-center"),
+                html.P(f"Effectifs: {startup_data['Effectif_def']}", className="text-center"),
+                html.P(f"Type d'organisme: {startup_data["Type d'organisme"]}", className="text-center"),
+                html.P(startup_data['mots_cles_def'], className="text-center")
+            ])
+        ], className="tech-card"), width=4),
+
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("Description"),
+            dbc.CardBody(html.P(startup_data["description"]))
+        ], className="tech-card"), width=4),
+
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("Informations de contact"),
+            dbc.CardBody([
+                html.P([html.Strong("Adresse: "), startup_data["adresse_def"]]),
+                html.P([html.Strong("Site web: "), html.A(startup_data["site_web_def"], href=startup_data["site_web_def"], target="_blank")])
+            ])
+        ], className="tech-card"), width=4)
+    ], className="g-4")
+
+    # Affichage des recommandations
+    recommended = recommend_societes(selected_startup, df, X_extended, pipeline)
+    recommended_cards = []
+    for _, row in recommended.iterrows():
+        recommended_cards.append(
+            dbc.Col(dbc.Card([
+                dbc.CardBody([
+                    html.H5(row["nom"], className="text-center"),
+                    html.Img(src=row["logo"], style={"width": "100px", "margin": "0 auto", "display": "block"}),
+                    html.P(f"Mots clés: {row['mots_cles_def']}", className="text-center"),
+                ])
+            ], className="tech-card"), width=2)
+        )   
+
+    recommended_card = dbc.Row(recommended_cards, className="g-4")
+
+    return startup_card, recommended_card
+
+
 ######################################################################## Recommandation ########################################################################
 
 # Prépration des données pour KNN
@@ -22,7 +83,7 @@ X_extended.reset_index(drop=True, inplace=True)
 
 # Entrainement du modèle 
 pipeline = Pipeline([
-    ('knn', NearestNeighbors(n_neighbors=10, metric='manhattan'))
+    ('knn', NearestNeighbors(n_neighbors=13, metric='manhattan'))
 ])
 pipeline.fit(X_extended)
 
@@ -39,7 +100,7 @@ def recommend_societes(selected_startup, data, X_extended, pipeline):
     voisins = data.iloc[indices[0]].copy()
     voisins['Distance'] = distances[0]
     voisins = voisins[voisins['nom'] != selected_startup]  # Exclure la société sélectionnée
-    voisins = voisins.sort_values(by='Distance').head(10)  # Prendre les 10 plus proches
+    voisins = voisins.sort_values(by='Distance').head(13)  # Prendre les 10 plus proches
 
     return voisins[['nom', 'description', 'logo','mots_cles_def', 'market', 'Activité principale', 'Distance']]
 
@@ -86,65 +147,8 @@ layout = dbc.Container([
 
     # Section affichage des informations sur la start-up sélectionnée
     html.Div(id="startup-info", className="text-center text-light"),
+    html.Br(),
     html.H2("Ces sociétés peuvent vous interesser :", className="section-title text-center mb-5"),    
     html.Div(id="recommended-startups", className="mt-5"),
 
 ], fluid=True)
-
-# Callback pour mettre à jour les informations de la startup sélectionnée
-@callback(
-    [Output("startup-info", "children"),
-     Output("recommended-startups", "children")],
-    [Input("df-dropdown", "value")]
-)
-def update_startup_info(selected_startup):
-    if not selected_startup:
-        return "", ""
-
-    startup_data = df[df["nom"] == selected_startup].iloc[0]
-
-    # Affichage des détails de la startup sélectionnée
-    startup_card = dbc.Row([
-        dbc.Col(dbc.Card([
-            dbc.CardBody([
-                html.Img(src=startup_data["logo"], style={"width": "150px", "margin": "0 auto", "display": "block"}),
-                html.H3(startup_data["nom"], className="text-center mt-3"),
-                html.P(f"Date de création: {startup_data['date_creation_def']}", className="text-center"),
-                html.P(f"Effectifs: {startup_data['Effectif_def']}", className="text-center"),
-                html.P(f"Type d'organisme: {startup_data["Type d'organisme"]}, {startup_data["market"]}", className="text-center"),
-                html.P(startup_data['mots_cles_def'], className="text-center")
-            ])
-        ], className="tech-card"), width=4),
-
-        dbc.Col(dbc.Card([
-            dbc.CardHeader("Description"),
-            dbc.CardBody(html.P(startup_data["description"]))
-        ], className="tech-card"), width=4),
-
-        dbc.Col(dbc.Card([
-            dbc.CardHeader("Informations de contact"),
-            dbc.CardBody([
-                html.P([html.Strong("Adresse: "), startup_data["adresse_def"]]),
-                html.P([html.Strong("Site web: "), html.A(startup_data["site_web_def"], href=startup_data["site_web_def"], target="_blank")])
-            ])
-        ], className="tech-card"), width=4)
-    ], className="g-4")
-
-    # Affichage des recommandations
-    recommended = recommend_societes(selected_startup, df, X_extended, pipeline)
-    recommended_cards = []
-    for _, row in recommended.iterrows():
-        recommended_cards.append(
-            dbc.Col(dbc.Card([
-                dbc.CardBody([
-                    html.H5(row["nom"], className="text-center"),
-                    html.Img(src=row["logo"], style={"width": "150px", "margin": "0 auto", "display": "block"}),
-                    html.P(f"Mots clés: {row['mots_cles_def']}", className="text-center"),
-                    html.P(f"Description: {row['description']}", className="text-left")
-                ])
-            ], className="tech-card"), width=4)
-        )   
-
-    recommended_card = dbc.Row(recommended_cards, className="g-4")
-
-    return startup_card, recommended_card

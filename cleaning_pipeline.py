@@ -676,9 +676,9 @@ def create_database(merged_df):
     financements.insert(0, "financement_id", range(1, len(financements) + 1))
 
     # Sauvegarde des datasets
-    societes.to_csv("societes.csv", index=False)
-    personnes.to_csv("personnes.csv", index=False)
-    financements.to_csv("financements.csv", index=False)
+    societes.to_csv("./dash_app/assets/societes.csv", index=False)
+    personnes.to_csv("./dash_app/assets/personnes.csv", index=False)
+    financements.to_csv("./dash_app/assets/financements.csv", index=False)
 
     logger.info("Les trois datasets ont été créés.")
 
@@ -686,17 +686,18 @@ def create_database(merged_df):
 
 # Coordonnées GPS des adresse
 @task
-def coord_adress():
-    df_societes = pd.read_csv('societes.csv')
-    df_adresse = pd.read_csv("data_adresse_geocoded.csv")
-    df_societes = pd.merge(
-        df_societes,
-        df_adresse,
-        on='SIREN',
-        how='left')
-    df_societes.to_csv('societes.csv', index=False)
+def coord_adress(df_societes):
+    df_societes = pd.read_csv("societes.csv")
+    df_adresse = pd.read_csv("./dash_app/assets/societes_geolocalisees.csv")
 
-    logger.info("Ajout des longitudes et latitudes")
+    #Fusion des latitude et longitude dans societe.csv
+    df_societes = df_societes.merge(df_adresse[['entreprise_id', 'latitude', 'longitude']],on="entreprise_id", how="left")
+
+    #Remplacer les valeurs  valeurs manquantes des coordonnées lambert X par lat et Y par long
+    df_societes['Coordonnée Lambert X'].fillna(df_societes['latitude'], inplace=True)
+    df_societes['Coordonnée Lambert Y'].fillna(df_societes['longitude'], inplace=True)
+
+    df_societes.to_csv("./dash_app/assets/societes.csv", index=False)
 
     return
 
@@ -737,7 +738,7 @@ def data_pipeline():
     # Création de la multibase de données
     df_societes, df_personnes, df_financements = create_database(merged_df)
     # Ajout des coordonées GPS
-    #coord_adress()
+    coord_adress(df_societes)
 
 if __name__ == "__main__":
     data_pipeline()

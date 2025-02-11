@@ -1,7 +1,11 @@
 import dash
+import pandas as pd
+import missingno as msno
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+from app import get_dataframe 
 
+df= get_dataframe('societes.csv')
 
 ################################################################################ LAYOUT ################################################################################
 
@@ -208,6 +212,10 @@ layout = html.Div([
                     ], className="tech-card")
                 ], md=6, lg=3, className="mb-4")
             ])
-        ], className="mb-5")
-    ], fluid=True, className="bg-white py-5")
-], className="project-page")
+        ], className="mb-5"), 
+# La base
+       html.Div([
+    html.H2("Notre base de données", className="section-title text-center mb-5"),
+    html.Img(src="/assets/data_def.png", style={"width": "100%"})
+], className="project-page bg-white py-5")
+], fluid=True, className="project-page")])
