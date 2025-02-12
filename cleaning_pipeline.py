@@ -573,7 +573,7 @@ def categorie_keywords(merged_df):
         "Électronique": [
             "circuit", "microchip", "semiconductor", "electronics", "PCB", "embedded system", 
             "hardware", "analog circuits", "digital circuits", "IoT", "sensor", "microcontroller",
-            "FPGA", "ASIC", "nanotechnology", "electronic design automation"
+            "FPGA", "ASIC", "nanotechnology", "electronic design automation", "medical devices", "wearable electronics"
         ],
         "Photonique": [
             "laser", "optics", "photonics", "holography", "fiber optics", "optoelectronics", 
@@ -615,25 +615,29 @@ def categorie_keywords(merged_df):
         ],
         "Transport": [
             "automobile", "EV", "autonomous vehicles", "aerospace", "mobility", "logistics", 
-            "hyperloop", "urban air mobility", "rail technology", "smart roads", "battery tech"
+            "hyperloop", "urban air mobility", "rail technology", "smart roads", "battery tech", 
+            "transportation", "smart mobility", "electric vehicles", "flying cars"
         ],
         "Santé": [
             "health", "santé", "médical", "biotech", "pharma", "medtech", "e-health", 
-            "telemedicine", "wearable health", "genomics", "bioprinting", "precision medicine"
+            "telemedicine", "wearable health", "genomics", "bioprinting", "precision medicine",
+            "biotechnology", "medical devices", "healthcare AI", "health data", "health insurance"
         ],
         "FoodTech": [
             "food", "agro", "foodtech", "alimentation", "nutrition", "agriculture", 
             "alternative proteins", "lab-grown meat", "functional foods", "food safety", 
-            "supply chain transparency"
+            "supply chain transparency", "alimentaire", "food waste reduction", "smart kitchen", "food delivery",
+            "nouriture" 
         ],
         "Énergie": [
             "énergie", "renewable", "hydrogène", "solaire", "éolien", "batterie", 
             "stockage énergie", "nuclear energy", "grid optimization", "smart energy", 
-            "hydropower", "carbon capture"
+            "hydropower", "carbon capture", "hydrogen", "energy efficiency"
         ],
         "Industrie": [
             "énergie", "robotics", "robotique", "industrie", "industrie 4.0", "industry", 
-            "automated manufacturing", "industrial IoT", "predictive maintenance", "smart factories"
+            "automated manufacturing", "industrial IoT", "predictive maintenance", "smart factories",
+            "manufacturing", "supply chain", "logistics", "industrial automation", "industrial software"
         ],
         "Industrie Culturelle et Créative": [
             "architecture", "heritage", "art", "foodTech", "cinema", "audiovisual", "design", 
@@ -660,7 +664,7 @@ def categorie_keywords(merged_df):
     "Autre": {
         "Divers": [
             "général", "miscellaneous", "autre", "various", "innovation", "future tech", 
-            "cross-industry"
+            "cross-industry", "business development", "entrepreneurship"
         ],
         "Inconnu": []
     }

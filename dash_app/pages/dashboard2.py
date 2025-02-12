@@ -57,10 +57,10 @@ layout = html.Div([
                 html.Label("Année de Création ou de financement", className="text-muted mb-2"),
                 dcc.RangeSlider(
                     id="year-filter",
-                    min=1986,  
-                    max=max_year,  
-                    value=[min_year, max_year],  
-                    marks={i: str(i) for i in range(min_year, max_year + 1, 4)}, 
+                    min=1986,
+                    max=max_year,
+                    value=[min_year, max_year],
+                    marks={i: str(i) for i in range(min_year, max_year + 1, 4)},
                     className="mb-3"
                 )
             ], md=4),
@@ -89,7 +89,7 @@ layout = html.Div([
                     dbc.CardBody([
                         html.Div([
                             html.Div([
-                                html.Span(id="total-funding", className="metric-value"),  
+                                html.Span(id="total-funding", className="metric-value"),
                             ], className="metric-number"),
                             html.P("Financement Total", className="metric-label")
                         ], className="metric-card")
@@ -113,7 +113,7 @@ layout = html.Div([
                 ], className="shadow-sm")
             ], md=3, className="mb-4"),  
 
-        # Graph de nbre de création de sociétés 
+        # Graph de nbre de création de sociétés
 
             dbc.Col([
                 dbc.Card([
