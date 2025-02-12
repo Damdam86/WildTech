@@ -13,18 +13,19 @@ df = get_dataframe('societes.csv')
 center_lat = df['latitude'].mean()
 center_lon = df['longitude'].mean()
 
-
 @callback(
-    Output("image-container", "children"),
+    [Output("image-container", "children"),
+     Output("startup-name", "children")],  # Ajout du nom
     Input("map-graph", "hoverData")
 )
 def display_hover_image(hoverData):
     if hoverData is None:
-        return ""
+        return "", ""
 
-    image_url = hoverData["points"][0]["customdata"][0]
+    image_url = hoverData["points"][0]["customdata"][0] 
+    name = hoverData["points"][0]["hovertext"]
 
-    return html.Img(src=image_url, style={"width": "200px", "height": "200px"})
+    return html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}), html.H3(name, className="text-center mt-3")
 
 # Fonction pour créer la carte
 def create_map(filtered_df=None):
@@ -37,7 +38,12 @@ def create_map(filtered_df=None):
             lat="latitude",
             lon="longitude",
             hover_name="nom",
-            hover_data="adresse_def",
+            hover_data={
+                "logo": False,
+                "adresse_def": True, 
+                "latitude": False,
+                "longitude": False
+            },
             zoom=5,
             center={"lat": center_lat, "lon": center_lon},
         )
@@ -58,6 +64,7 @@ def create_map(filtered_df=None):
 
 
 ################################################################################ LAYOUT ################################################################################
+keywords = df['mots_cles_def'].dropna().str.split(',').explode().str.strip().unique()
 
 layout = html.Div([
 # Hero Section avec image de fond et overlay
@@ -84,21 +91,22 @@ layout = html.Div([
                     dbc.CardBody([
                         dbc.Row([
                             dbc.Col([
-                                html.Label("Recherche par ville ou code postal"),
+                                html.Label("Recherche par ville"),
                                 dbc.Input(
                                     id="location-search",
                                     type="text",
-                                    placeholder="Entrez une ville ou un code postal",
+                                    placeholder="Entrez une ville",
                                     className="mb-3"
                                 ),
                             ], md=6),
+                        
                             dbc.Col([
                                 html.Label("Recherche par mots-clés"),
-                                dbc.Input(
-                                    id="keyword-search",
-                                    type="text",
-                                    placeholder="Entrez des mots-clés",
-                                    className="mb-3"
+                                dcc.Dropdown(
+                                    id='keyword-dropdown',
+                                    options=[{'label': k, 'value': k} for k in keywords],
+                                    multi=True,
+                                    placeholder="Sélectionnez des mots-clés"
                                 ),
                             ], md=6),
                         ]),
@@ -124,6 +132,8 @@ layout = html.Div([
                 dbc.Card([
                     dbc.CardHeader("Info startup"),
                     dbc.CardBody([
+                        html.Div(id="image-container", style={"textAlign": "center"}),
+                        html.Div(id="startup-name", className="text-center mt-3")  
                     ])
                 ])
             ], width=4)
@@ -137,9 +147,9 @@ layout = html.Div([
     Output('map-graph', 'figure'),
     [Input('search-button', 'n_clicks')],
     [State('location-search', 'value'),
-    State('keyword-search', 'value')]
+    State('keyword-dropdown', 'value')]
 )
-def update_map(n_clicks, location, keywords):
+def update_map(n_clicks, location, selected_keywords):
     if n_clicks is None:
         return create_map()
 
@@ -149,8 +159,10 @@ def update_map(n_clicks, location, keywords):
         location = location.lower()
         filtered_df = filtered_df[filtered_df['adresse_def'].str.lower().str.contains(location, na=False)]
 
-    if keywords:
-        keywords = keywords.lower()
-        filtered_df = filtered_df[filtered_df['mot_cles_def'].str.lower().str.contains(keywords, na=False)]
+    if selected_keywords:
+        filtered_df = filtered_df[filtered_df['mots_cles_def'].fillna("").apply(lambda x: any(kw in x for kw in selected_keywords))]
 
     return create_map(filtered_df)
+
+
+
