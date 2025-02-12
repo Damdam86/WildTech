@@ -109,7 +109,7 @@ def mean_funding(sector, year_range, effectif):
     else:
         mean_funding = 0  # Évite la division par zéro
 
-    return f"{mean_funding:,.0f} €"
+    return f"{mean_funding:,.0f} €".replace(",", " ")
 
 
 @app.callback(
@@ -148,7 +148,7 @@ def total_funding(sector, year_range, effectif):
     # Calcul du financement total
     total_funding = df['Montant_def'].fillna(0).sum()
 
-    return f"{total_funding:,.0f} €"
+    return f"{total_funding:,.0f} €".replace(",", " ")
 
 #Callback pour rendre le graph funding dynamique
 @app.callback(
@@ -343,7 +343,6 @@ def pourc_levee(sector, year_range, effectif):
         Input('year-filter', 'value'),
         Input('effectif-filter', 'value')
     ])
-
 def nbre_startup(sector, year_range, effectif):
     df = get_dataframe("financements.csv") 
     df['Date dernier financement'] = pd.to_datetime(df['Date dernier financement'], errors='coerce')
@@ -365,11 +364,15 @@ def nbre_startup(sector, year_range, effectif):
         ]
 
     df = df[df["entreprise_id"].isin(df_societe["entreprise_id"])]
-    
-    # Calcul du nbre de startups uniques
+
+    # Calcul du nombre unique de startups
     nbre_start = df_societe['nom'].nunique()
 
-    return f"{nbre_start}"
+    # Formater avec un espace comme séparateur de milliers
+    formatted_nbre_start = f"{nbre_start:,}".replace(",", " ")
+
+    return formatted_nbre_start
+
 
 
 @app.callback(
