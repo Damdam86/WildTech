@@ -8,6 +8,8 @@ import plotly.express as px
 
 # Chargement des données
 df = get_dataframe('societes.csv')
+df['Sous-Catégorie'] = df['Sous-Catégorie'].str.split("|")
+df = df.explode('Sous-Catégorie')
 
 # Moyenne des longitude et lat
 center_lat = df['latitude'].mean()
@@ -64,7 +66,6 @@ def create_map(filtered_df=None):
 
 
 ################################################################################ LAYOUT ################################################################################
-keywords = df['mots_cles_def'].dropna().str.split(',').explode().str.strip().unique()
 
 layout = html.Div([
 # Hero Section avec image de fond et overlay
@@ -101,12 +102,12 @@ layout = html.Div([
                             ], md=6),
                         
                             dbc.Col([
-                                html.Label("Recherche par mots-clés"),
+                                html.Label("Recherche par catégorie"),
                                 dcc.Dropdown(
                                     id='keyword-dropdown',
-                                    options=[{'label': k, 'value': k} for k in keywords],
+                                    options=[{'label': cat, 'value': cat} for cat in df['Sous-Catégorie'].dropna().unique()],
                                     multi=True,
-                                    placeholder="Sélectionnez des mots-clés"
+                                    placeholder="Sélectionnez une catégorie"
                                 ),
                             ], md=6),
                         ]),
@@ -160,7 +161,7 @@ def update_map(n_clicks, location, selected_keywords):
         filtered_df = filtered_df[filtered_df['adresse_def'].str.lower().str.contains(location, na=False)]
 
     if selected_keywords:
-        filtered_df = filtered_df[filtered_df['mots_cles_def'].fillna("").apply(lambda x: any(kw in x for kw in selected_keywords))]
+        filtered_df = filtered_df[filtered_df['Sous-Catégorie'].fillna("").apply(lambda x: any(kw in x for kw in selected_keywords))]
 
     return create_map(filtered_df)
 
