@@ -33,11 +33,14 @@ def display_hover_image(hoverData):
     adresse = custom_data[1] if custom_data[1] else "Adresse non disponible"
     date_creation = custom_data[2] if custom_data[2] else "Non disponible"
     categories = custom_data[3] if custom_data[3] else "Non spécifiée"
+    description = custom_data[4] if custom_data[4] else "Description non disponible"
 
      # Utilisation de html.Div et <br> pour le saut de ligne
     startup_info = [f"Adresse: {adresse}",
-        html.Br(),
-        f"Date de création: {date_creation}"]
+                    html.Br(),
+                    f"Date de création: {date_creation}",
+                    html.Br(),
+                    f"Description: {description}"]
 
     return (
         html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}),
@@ -62,6 +65,7 @@ def create_map(filtered_df=None):
                 "adresse_def": True,
                 "date_creation_def": False,
                 "Sous-Catégorie": True,
+                "description": False,
                 "latitude": False,
                 "longitude": False
             },
@@ -69,8 +73,10 @@ def create_map(filtered_df=None):
             center={"lat": center_lat, "lon": center_lon},
         )
 
-    fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7), # Affichage des clusters
-                    customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie"]].values) 
+    fig.update_traces(marker=dict(size=8), opacity=0.7), # Affichage des clusters
+                    
+    #fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7), # Affichage des clusters
+                    #customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie"]].values) 
 
     fig.update_layout(
     title="Carte des Startups",
