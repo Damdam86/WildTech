@@ -474,12 +474,59 @@ def top_startup_size(sector, year_range, effectif):
 
     return fig6
 
+@app.callback(
+    Output("cloud-words", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
 
+def top_startup_size(sector, year_range, effectif):
+    from wordcloud import WordCloud
+    from collections import Counter
+    import plotly.graph_objects as go
 
+    df = get_dataframe("societes.csv")
+    df['date_creation_def'] = pd.to_datetime(df['date_creation_def'], errors="coerce")
+    df["annee_creation"] = df["date_creation_def"].dt.year  # Extraire l'année
+    if sector:
+        df = df[df["Activité principale"].isin(sector)]
+    if effectif:
+        df = df[df["Effectif_def"].isin(effectif)]
+    if year_range:
+        df = df[
+            (df["annee_creation"].notna()) &  # Évite les NaN
+            (df["annee_creation"].between(year_range[0], year_range[1]))
+        ]
 
+    df['mots_cles_def'] = df['mots_cles_def'].fillna('')
+    # Fusionner les mots-clés de toutes les lignes en une seule grande chaîne
+    all_keywords = ','.join(df['mots_cles_def'].astype(str))
+    # Diviser les mots-clés en une liste de mots individuels
+    keywords_list = [keyword.strip() for keyword in all_keywords.split(',') if keyword.strip()]
+    # Utiliser Counter pour compter la fréquence des mots-clés
+    keywords_freq = Counter(keywords_list)
+    # Convertir le résultat en DataFrame trié
+    keywords_df = pd.DataFrame(keywords_freq.items(), columns=['Mot', 'Count']).sort_values(by='Count', ascending=False)
+    # Créer un dictionnaire des mots avec leurs fréquences
+    word_freq = dict(zip(keywords_df['Mot'], keywords_df['Count']))
+    # Générer le nuage de mots
+    wordcloud = WordCloud(width=1000, height=600, background_color='white', colormap='viridis').generate_from_frequencies(word_freq)
+    img = wordcloud.to_array()
 
+    # Créer une figure Plotly avec l'image du nuage de mots
+    fig = go.Figure()
+    fig.add_trace(
+        go.Image(z=img)
+    )
+    fig.update_layout(
+        margin={"r": 10, "t": 40, "l": 10, "b": 10},
+        xaxis=dict(visible=False),  # Cacher l'axe X
+        yaxis=dict(visible=False)   # Cacher l'axe Y
+    )
+
+    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-

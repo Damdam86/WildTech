@@ -208,7 +208,7 @@ layout = html.Div([
                         dcc.Graph(id="cloud-words")
                     ])
                 ], className="shadow-sm")
-            ], md=6, className="mb-4")
+            ], md=12, className="mb-4")
 
         ]),
 
