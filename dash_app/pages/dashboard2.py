@@ -167,6 +167,15 @@ layout = html.Div([
 
             dbc.Col([
                 dbc.Card([
+                    dbc.CardHeader("Top 10 des entreprises ayant levé le plus de fonds"),
+                    dbc.CardBody([
+                        dcc.Graph(id="top-funded")
+                    ])
+                ], className="shadow-sm")
+            ], md=6, className="mb-4"),
+
+            dbc.Col([
+                dbc.Card([
                     dbc.CardHeader("Évolution création de startups par an"),
                     dbc.CardBody([
                         dcc.Graph(id="startup-year")
@@ -176,12 +185,31 @@ layout = html.Div([
 
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader("Top 10 des entreprises ayant levé le plus de fonds"),
+                    dbc.CardHeader("Distribution des secteurs d'activités"),
                     dbc.CardBody([
-                        dcc.Graph(id="top-funded")
+                        dcc.Graph(id="top-sector")
+                    ])
+                ], className="shadow-sm")
+            ], md=6, className="mb-4"),
+
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Distribution des StartUp par nombre de salariés (TOP 5)"),
+                    dbc.CardBody([
+                        dcc.Graph(id="top-startup-size")
+                    ])
+                ], className="shadow-sm")
+            ], md=6, className="mb-4"),
+
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Nuage de mots clés"),
+                    dbc.CardBody([
+                        dcc.Graph(id="cloud-words")
                     ])
                 ], className="shadow-sm")
             ], md=6, className="mb-4")
+
         ]),
 
 ], fluid=True)

@@ -372,6 +372,113 @@ def nbre_startup(sector, year_range, effectif):
     return f"{nbre_start}"
 
 
+@app.callback(
+    Output("top-sector", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def top_sector(sector, year_range, effectif):
+    df = get_dataframe("societes.csv")
+    df['date_creation_def'] = pd.to_datetime(df['date_creation_def'], errors="coerce")
+    df["annee_creation"] = df["date_creation_def"].dt.year  # Extraire l'année
+    # Dictionnaire des secteurs d'activité (codes NAF partiels)
+    dict_secteurs = {
+        '01': 'Agriculture',
+        '02': 'Sylviculture et exploitation forestière',
+        '03': 'Pêche et aquaculture',
+        '05': 'Extraction de houille et de lignite',
+        '08': 'Autres industries extractives',
+        '10': 'Industries alimentaires',
+        '13': 'Fabrication de textiles',
+        '18': 'Imprimerie et reproduction d\'enregistrements',
+        '26': 'Fabrication de produits informatiques et électroniques',
+        '32': 'Autres industries manufacturières',
+        '41': 'Construction de bâtiments',
+        '43': 'Travaux de construction spécialisés',
+        '49': 'Transports terrestres et transport par conduites',
+        '56': 'Restauration',
+        '58': 'Édition',
+        '61': 'Télécommunications',
+        '62': 'Programmation, conseil et autres activités informatiques',
+        '63': 'Services d’information',
+        '64': 'Activités financières et d’assurance',
+        '68': 'Activités immobilières',
+        '70': 'Activités des sièges sociaux, conseil en gestion',
+        '71': 'Ingénierie et études techniques',
+        '72': 'Recherche et développement scientifique',
+        '73': 'Publicité et études de marché',
+        '74': 'Autres activités spécialisées, scientifiques et techniques',
+        '77': 'Location et exploitation de biens immobiliers',
+        '82': 'Activités administratives et autres services de soutien'
+    }
+    # Étape 1 : Extraire les 2 premiers chiffres du code de l'activité principale
+    df['Secteur'] = df['Activité principale'].str[:2]
+    # Étape 2 : Mapper avec le dictionnaire des secteurs
+    df['Nom Secteur'] = df['Secteur'].map(dict_secteurs)
+    # Calculer la distribution des valeurs et trier par ordre décroissant
+    
+    if sector:
+        df = df[df["Activité principale"].isin(sector)]
+    if effectif:
+        df = df[df["Effectif_def"].isin(effectif)]
+    if year_range:
+        df = df[
+            (df["annee_creation"].notna()) &  # Évite les NaN
+            (df["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    distribution = df['Nom Secteur'].value_counts().reset_index()
+    distribution.columns = ['Nom Secteur', 'Count']
+    distribution_top5 = distribution.sort_values(by='Count', ascending=True).tail(5)
+
+    # Créer le graphique en barres
+    fig5 = px.bar(distribution_top5, x='Count', y='Nom Secteur',
+                labels={'Nom Secteur': 'Secteur', 'Count': 'Nombre'},
+                text='Count')
+
+    return fig5
+
+
+@app.callback(
+    Output("top-startup-size", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ])
+
+def top_startup_size(sector, year_range, effectif):
+    df = get_dataframe("societes.csv")
+    df['date_creation_def'] = pd.to_datetime(df['date_creation_def'], errors="coerce")
+    df["annee_creation"] = df["date_creation_def"].dt.year  # Extraire l'année
+    if sector:
+        df = df[df["Activité principale"].isin(sector)]
+    if effectif:
+        df = df[df["Effectif_def"].isin(effectif)]
+    if year_range:
+        df = df[
+            (df["annee_creation"].notna()) &  # Évite les NaN
+            (df["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    # Calculer la distribution des valeurs et trier par ordre décroissant
+    distribution = df['Effectif_def'].value_counts().reset_index()
+    distribution.columns = ['Effectif', 'Count']
+    # Filtrer pour afficher uniquement le TOP 5
+    distribution_top5 = distribution.sort_values(by='Count', ascending=True).tail(5)
+    # Créer le graphique en camembert
+    fig6 = px.pie(distribution_top5, names='Effectif', values='Count')
+
+    return fig6
+
+
+
+
+
+
 if __name__ == '__main__':
     app.run_server(debug=True)
 

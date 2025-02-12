@@ -37,19 +37,18 @@ def create_map(filtered_df=None):
             lat="latitude",
             lon="longitude",
             hover_name="nom",
-            mapbox_style='carto- positron',
             hover_data="adresse_def",
             zoom=5,
             center={"lat": center_lat, "lon": center_lon},
         )
 
-    fig.update_traces(cluster=dict(enabled=True, color="blue", opacity=0.7)) # Affichage des clusters
+    fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7)) # Affichage des clusters
 
     fig.update_layout(
     title="Carte des Startups",
     mapbox_style="open-street-map",
     margin={"r": 0, "t": 0, "l": 0, "b": 0},
-    dragmode="zoom",  # ✅ Permet d'utiliser la molette pour zoomer
+    dragmode="zoom",  # Permet d'utiliser la molette pour zoomer
     mapbox=dict(
         zoom=5,
         center={"lat": center_lat, "lon": center_lon},
@@ -120,7 +119,14 @@ layout = html.Div([
                         dcc.Graph(id='map-graph', figure=create_map(), style={"height": "600px"}, config={'scrollZoom': True})
                     ])
                 ])
-            ], width=12)
+            ], width=8),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Info startup"),
+                    dbc.CardBody([
+                    ])
+                ])
+            ], width=4)
         ], className="mb-5"),
     ])
 ])
