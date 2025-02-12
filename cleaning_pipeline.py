@@ -5,6 +5,7 @@ import ast
 from prefect import flow, task
 from prefect.logging import get_logger
 import boto3 as boto3
+from fuzzywuzzy import process
 
 logger = get_logger()
 
@@ -542,10 +543,164 @@ def clean_keywords_task(merged_df):
         errors='coerce'  # 🔹 Convertit les erreurs en NaT (valeur manquante)
         )
     merged_df["date_creation_def"] = pd.to_datetime(
-        merged_df["date_creation_def"], 
+        merged_df["date_creation_def"],
         format='%Y-%m-%d',  # ⚠️ Adapte ce format à ton jeu de données
         errors='coerce'  # 🔹 Convertit les erreurs en NaT (valeur manquante)
         )
+
+    return merged_df
+
+
+@task
+def categorie_keywords(merged_df):
+    from fuzzywuzzy import process
+
+    # Remplir les valeurs NaN
+    merged_df['mots_cles_def'] = merged_df['mots_cles_def'].fillna('')
+    
+    # Transformation des mots-clés en listes
+    merged_df['mots_cles_def'] = merged_df['mots_cles_def'].apply(lambda x: [kw.strip() for kw in x.split(',') if kw.strip()])
+
+    # Définition des catégories et sous-catégories
+    categories = {
+    "Technologie": {
+        "Intelligence Artificielle": [
+            "artificial intelligence", "deep learning", "machine learning", "IA", "chatbot", 
+            "neural network", "computer vision", "natural language processing", "NLP", "AI", 
+            "ML", "DL", "Big Data", "reinforcement learning", "automated reasoning", 
+            "speech recognition", "AI ethics", "generative AI", "LLM", "transformer models"
+        ],
+        "Électronique": [
+            "circuit", "microchip", "semiconductor", "electronics", "PCB", "embedded system", 
+            "hardware", "analog circuits", "digital circuits", "IoT", "sensor", "microcontroller",
+            "FPGA", "ASIC", "nanotechnology", "electronic design automation"
+        ],
+        "Photonique": [
+            "laser", "optics", "photonics", "holography", "fiber optics", "optoelectronics", 
+            "quantum optics", "spectroscopy", "lightwave technology"
+        ],
+        "Robotique": [
+            "robotics", "système autonome", "drone", "humanoid robot", "industrial robots", 
+            "swarm robotics", "AI-driven robotics", "cobot", "exoskeleton", "mechatronics"
+        ],
+        "Impression 3D": [
+            "impression 3D", "fabrication additive", "3D printing", "stereolithography", 
+            "FDM", "SLS", "bioprinting", "metal 3D printing", "rapid prototyping"
+        ],
+        "Software": [
+            "enterprise software", "logiciel", "software", "application", "progiciel", 
+            "SaaS", "DevOps", "API", "software development", "microservices", 
+            "cloud computing", "open source", "agile development", "low-code", "no-code", 
+            "cybersecurity software"
+        ],
+        "Quantique": [
+            "quantum computing", "qubits", "quantum supremacy", "superconducting qubits", 
+            "quantum cryptography", "quantum algorithms", "quantum communication", 
+            "quantum networking", "quantum AI", "quantum physics", "quantum sensors"
+        ],
+        "IoT": [
+            "Internet of Things", "IoT", "smart devices", "connected devices", 
+            "edge computing", "smart sensors", "IoT security", "industrial IoT", 
+            "home automation", "wearable IoT", "5G IoT", "smart cities"
+        ],
+    },
+    "Marché": {
+        "Défense": [
+            "military", "aerospace", "defense", "naval", "cybersecurity", "radar", 
+            "electronic warfare", "military AI", "space defense", "drone warfare"
+        ],
+        "Agriculture": [
+            "agritech", "precision farming", "vertical farming", "organic farming", "agriculture", 
+            "smart irrigation", "drones for agriculture", "genetically modified crops", "agri-robotics"
+        ],
+        "Transport": [
+            "automobile", "EV", "autonomous vehicles", "aerospace", "mobility", "logistics", 
+            "hyperloop", "urban air mobility", "rail technology", "smart roads", "battery tech"
+        ],
+        "Santé": [
+            "health", "santé", "médical", "biotech", "pharma", "medtech", "e-health", 
+            "telemedicine", "wearable health", "genomics", "bioprinting", "precision medicine"
+        ],
+        "FoodTech": [
+            "food", "agro", "foodtech", "alimentation", "nutrition", "agriculture", 
+            "alternative proteins", "lab-grown meat", "functional foods", "food safety", 
+            "supply chain transparency"
+        ],
+        "Énergie": [
+            "énergie", "renewable", "hydrogène", "solaire", "éolien", "batterie", 
+            "stockage énergie", "nuclear energy", "grid optimization", "smart energy", 
+            "hydropower", "carbon capture"
+        ],
+        "Industrie": [
+            "énergie", "robotics", "robotique", "industrie", "industrie 4.0", "industry", 
+            "automated manufacturing", "industrial IoT", "predictive maintenance", "smart factories"
+        ],
+        "Industrie Culturelle et Créative": [
+            "architecture", "heritage", "art", "foodTech", "cinema", "audiovisual", "design", 
+            "editing", "book", "livre", "EdTech", "media", "presse", "radio", "mode", "fashion", 
+            "music", "video", "gaming", "esport", "graphism", "graphisme", "photography", 
+            "web", "communication", "NFT art", "digital content creation", "VR storytelling"
+        ],
+    },
+    "Mode de Vente": {
+        "SAAS": [
+            "saas", "cloud service", "software-as-a-service", "subscription-based software", 
+            "enterprise SaaS", "multi-tenant SaaS", "B2B SaaS"
+        ],
+        "Abonnement": [
+            "subscription", "monthly subscription", "membership", "commission", 
+            "recurring revenue", "digital subscription", "subscription box"
+        ],
+        "Marketplace & E-commerce": [
+            "marketplace", "ecommerce", "vente en ligne", "commerce électronique", 
+            "dropshipping", "direct-to-consumer", "B2C marketplace", "C2C marketplace", 
+            "B2B marketplace", "social commerce"
+        ],
+    },
+    "Autre": {
+        "Divers": [
+            "général", "miscellaneous", "autre", "various", "innovation", "future tech", 
+            "cross-industry"
+        ],
+        "Inconnu": []
+    }
+}
+
+    # Liste des mots-clés connus pour la correspondance
+    all_keywords = {kw: (cat, subcat) for cat, subcats in categories.items() for subcat, kws in subcats.items() for kw in kws}
+
+    # Fonction de classification permettant plusieurs catégories et sous-catégories
+    def classify_keywords(keyword_list):
+        found_categories = set()
+        found_subcategories = set()
+
+        for keyword in keyword_list:
+            keyword_lower = keyword.lower()
+            
+            # Vérification exacte
+            for category, subcategories in categories.items():
+                for subcategory, keywords in subcategories.items():
+                    if any(k in keyword_lower for k in keywords):
+                        found_categories.add(category)
+                        found_subcategories.add(subcategory)
+
+            # Vérification avec Fuzzy Matching
+            result = process.extractOne(keyword_lower, all_keywords.keys(), score_cutoff=80)
+            if result:
+                match, score = result
+                cat, subcat = all_keywords.get(match, ("Autre", "Divers"))
+                found_categories.add(cat)
+                found_subcategories.add(subcat)
+
+        # Si aucune catégorie trouvée, mettre "Autre"
+        if not found_categories:
+            found_categories.add("Autre")
+            found_subcategories.add("Divers")
+
+        return "|".join(sorted(found_categories)), "|".join(sorted(found_subcategories))
+
+    # Appliquer la classification améliorée
+    merged_df[['Catégorie', 'Sous-Catégorie']] = merged_df['mots_cles_def'].apply(lambda x: pd.Series(classify_keywords(x)))
 
     return merged_df
 
@@ -654,7 +809,7 @@ def create_database(merged_df):
     # Table société avec créaton ID
     societes = merged_df[['nom', 'description', 'logo', "Type d'organisme", 'SIREN',
                             'Activité principale', 'Effectif_def', 'market',
-                            'mots_cles_def', 'site_web_def', 'adresse_def',
+                            'mots_cles_def', 'Catégorie', 'Sous-Catégorie', 'site_web_def', 'adresse_def',
                             'date_creation_def','SIRET','Date de fermeture','Coordonnée Lambert X','Coordonnée Lambert Y']].drop_duplicates()
     societes.insert(0, "entreprise_id", range(1, len(societes) + 1))
 
@@ -665,14 +820,10 @@ def create_database(merged_df):
     personnes.insert(0, "contact_id", range(1, len(personnes) + 1))
 
     # Table des Financements avec entreprise_id et création de financement_id
-    financements = merged_df[['nom', 'Date dernier financement', 'Série',
-                              'Montant_def', 'valeur_entreprise']].drop_duplicates()
+   
     financements = merged_df[['nom', 'Date dernier financement', 'Série',
                               'Montant_def', 'valeur_entreprise']].drop_duplicates()
     financements = financements.merge(societes[['nom', 'entreprise_id']], on='nom', how='left')
-    financements = financements[['entreprise_id', 'Date dernier financement',
-                                 'Série', 'Montant_def',
-                                'valeur_entreprise']]
     financements = financements[['entreprise_id', 'Date dernier financement',
                                  'Série', 'Montant_def',
                                 'valeur_entreprise']]
@@ -712,17 +863,15 @@ def coord_adress(df_societes):
     return df_societes
 
 @task
-def send_to_s3(societes, personnes, financements, bucket_name="oc-projet8"):
-    """Envoi du fichier sur S3"""
-    datasets = {
-    "societes": societes,
-    "personnes": personnes,
-    "financements": financements
-}
+def send_to_s3(filename, bucket_name="wildstartech"):
+    # Chemin des CSV
+    local_path = f"./dash_app/assets/{filename}"
+    # Initialisation S3
     s3 = boto3.client('s3')
-    s3.upload_file(filename, 'oc-projet8', filename)
+    # Upload depuis `local_path`
+    s3.upload_file(local_path, bucket_name, filename)
 
-    logger.info(f"Envoi du fichier {filename} sur S3")
+    logger.info(f"Envoi réussi des CSV sur S3")
 
     return filename
 
@@ -752,6 +901,8 @@ def data_pipeline():
     merged_df = clean_effectif(merged_df)
     # Clean mot clés
     merged_df = clean_keywords_task(merged_df)
+    # Catégorisation des mots clés
+    merged_df = categorie_keywords(merged_df)
     # Ajout des SIREN de l'API SIREN
     merged_df = new_siren(merged_df) 
     # Ajout des SIREN de l'API SIREN 2
@@ -765,7 +916,9 @@ def data_pipeline():
     # Ajout des coordonées GPS
     coord_adress(df_societes)
     # Envoi cvs sur S3
-    #send_to_s3(df_societes, df_personnes, df_financements)
+    send_to_s3("societes.csv")
+    send_to_s3("personnes.csv")
+    send_to_s3("financements.csv")
 
 
 if __name__ == "__main__":

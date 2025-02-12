@@ -4,10 +4,10 @@ import dash_bootstrap_components as dbc
 
 # Données de l'équipe
 team_members = [
-    {"name": "Manon", "git": "https://github.com/Damdam86", "role": "La scrapeuse", "image": "./assets/Manon.png"},
+    {"name": "Manon", "git": "https://github.com/manongte", "role": "La scrapeuse", "image": "./assets/Manon.png"},
     {"name": "Farid", "git": "git adresse", "role": "Le plotlyste", "image": "./assets/Farid.png"},
-    {"name": "Nathalie", "git": "git adresse", "role": "La SIREN", "image": "./assets/Nathalie.png"},
-    {"name": "Damien", "git": "git adresse", "role": "La pipelette", "image": "./assets/Damien.png"},
+    {"name": "Nathalie", "git": "https://github.com/Nathlake", "role": "La SIREN", "image": "./assets/Nathalie.png"},
+    {"name": "Damien", "git": "https://github.com/Damdam86", "role": "La pipelette", "image": "./assets/Damien.png"},
 ]
 
 # Les cartes de l'équipe
@@ -21,7 +21,7 @@ team_cards = [
                     [
                         html.H5(member["name"], className="text-center"),
                         html.P(member["role"], className="text-center text-muted"),
-                        html.A("GitHub", href=member["git"], target="_blank", className="d-block text-center text-primary"),
+                        html.A("GitHub", href=member["git"], target="_blank", className="metric-label text-center"),
                     ]
                 ),
             ],
