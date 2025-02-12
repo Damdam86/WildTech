@@ -505,7 +505,7 @@ def clean_keywords_task(merged_df):
     """ Nettoie la colonne mots_cles_def en supprimant les doublons et les caractères inutiles. """
 
     # Liste des caractères à supprimer
-    remove_chars = ["[", "]", "'", '"', "#", "()", "{}", "/"]
+    remove_chars = ["[", "]", "'", '"', "#", "()", "{}", "/", "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9."]
 
     def process_entry(entry):
         if pd.isna(entry) or entry in ["", "[]"]:  # Gérer les NaN et listes vides
@@ -683,16 +683,6 @@ def create_database(merged_df):
     personnes.to_csv("./dash_app/assets/personnes.csv", index=False)
     financements.to_csv("./dash_app/assets/financements.csv", index=False)
 
-    def send_to_s3(societes, personnes, financements):
-        """Envoi du fichier sur S3"""
-        df.to_csv(filename, index=False)
-        s3 = boto3.client('s3')
-        s3.upload_file(filename, 'oc-projet8', filename)
-
-        logger.info(f"Envoi du fichier {filename} sur S3")
-
-        return filename
-    
     logger.info("Les trois datasets ont été créés.")
 
     return societes, personnes, financements
@@ -722,9 +712,13 @@ def coord_adress(df_societes):
     return df_societes
 
 @task
-def send_to_s3(df_societes, df_personnes, df_financements):
+def send_to_s3(societes, personnes, financements, bucket_name="oc-projet8"):
     """Envoi du fichier sur S3"""
-    df.to_csv(filename, index=False)
+    datasets = {
+    "societes": societes,
+    "personnes": personnes,
+    "financements": financements
+}
     s3 = boto3.client('s3')
     s3.upload_file(filename, 'oc-projet8', filename)
 
@@ -771,7 +765,7 @@ def data_pipeline():
     # Ajout des coordonées GPS
     coord_adress(df_societes)
     # Envoi cvs sur S3
-    send_to_s3(df_societes, df_personnes, df_financements)
+    #send_to_s3(df_societes, df_personnes, df_financements)
 
 
 if __name__ == "__main__":
