@@ -4,6 +4,7 @@ import numpy as np
 import ast
 from prefect import flow, task
 from prefect.logging import get_logger
+import boto3 as boto3
 
 logger = get_logger()
 
@@ -504,31 +505,31 @@ def clean_keywords_task(merged_df):
     """ Nettoie la colonne mots_cles_def en supprimant les doublons et les caractères inutiles. """
 
     # Liste des caractères à supprimer
-    remove_chars = ["[", "]", "'", '"', "#", "()", "{}"]
+    remove_chars = ["[", "]", "'", '"', "#", "()", "{}", "/"]
 
     def process_entry(entry):
         if pd.isna(entry) or entry in ["", "[]"]:  # Gérer les NaN et listes vides
             return None
 
-        # 🔹 Convertir les tuples en listes
+        # Convertir les tuples en listes
         if isinstance(entry, tuple):
             entry = list(entry)
 
-        # 🔹 Convertir une chaîne qui ressemble à une liste en vraie liste
+        # Convertir une chaîne qui ressemble à une liste en vraie liste
         if isinstance(entry, str) and entry.startswith("[") and entry.endswith("]"):
             try:
                 entry = eval(entry)  # Convertir la chaîne en liste réelle
             except:
                 return None  # Si erreur, ignorer
 
-        # 🔹 Si ce n'est pas une liste, transformer en liste avec une seule valeur
+        # Si ce n'est pas une liste, transformer en liste avec une seule valeur
         if not isinstance(entry, list):
             entry = [entry]
 
-        # 🔹 Nettoyage : suppression des espaces et mise en minuscule
+        # Nettoyage : suppression des espaces et mise en minuscule
         clean_list = sorted(set(str(item).strip().lower() for item in entry if str(item).strip()))
 
-        # 🔹 Suppression des caractères indésirables
+        # Suppression des caractères indésirables
         clean_list = [word.translate(str.maketrans("", "", "".join(remove_chars))) for word in clean_list]
 
         return ", ".join(clean_list) if clean_list else None  # Retourne une chaîne propre
@@ -682,9 +683,20 @@ def create_database(merged_df):
     personnes.to_csv("./dash_app/assets/personnes.csv", index=False)
     financements.to_csv("./dash_app/assets/financements.csv", index=False)
 
+    def send_to_s3(societes, personnes, financements):
+        """Envoi du fichier sur S3"""
+        df.to_csv(filename, index=False)
+        s3 = boto3.client('s3')
+        s3.upload_file(filename, 'oc-projet8', filename)
+
+        logger.info(f"Envoi du fichier {filename} sur S3")
+
+        return filename
+    
     logger.info("Les trois datasets ont été créés.")
 
     return societes, personnes, financements
+
 
 # Coordonnées GPS des adresse
 @task
@@ -708,6 +720,17 @@ def coord_adress(df_societes):
     df_societes.to_csv("./dash_app/assets/societes.csv", index=False)
 
     return df_societes
+
+@task
+def send_to_s3(df_societes, df_personnes, df_financements):
+    """Envoi du fichier sur S3"""
+    df.to_csv(filename, index=False)
+    s3 = boto3.client('s3')
+    s3.upload_file(filename, 'oc-projet8', filename)
+
+    logger.info(f"Envoi du fichier {filename} sur S3")
+
+    return filename
 
 
 @flow
@@ -747,6 +770,8 @@ def data_pipeline():
     df_societes, df_personnes, df_financements = create_database(merged_df)
     # Ajout des coordonées GPS
     coord_adress(df_societes)
+    # Envoi cvs sur S3
+    send_to_s3(df_societes, df_personnes, df_financements)
 
 
 if __name__ == "__main__":
