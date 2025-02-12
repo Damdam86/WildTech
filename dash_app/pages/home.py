@@ -121,12 +121,12 @@ layout = dbc.Container([
 
     # KPI Cards
     dbc.Row([
-        dbc.Col(dbc.Card([
-            dbc.CardBody([
-                html.H4("Start-ups", className="metric-label"),
-                html.H2(f"{df.nom.nunique()}", className="metric-value")
-            ])
-        ]), width=4),
+    dbc.Col(dbc.Card([
+        dbc.CardBody([
+            html.H4("Start-ups", className="metric-label"),
+            html.H2(f"{df.nom.nunique():,}".replace(",", " "), className="metric-value")  # Ajout du séparateur de milliers
+        ])
+    ]), width=4),
 
         dbc.Col(dbc.Card([
             dbc.CardBody([

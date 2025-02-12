@@ -90,7 +90,6 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span(id="total-funding", className="metric-value"),  
-                                html.Span("€", className="metric-symbol")
                             ], className="metric-number"),
                             html.P("Financement Total", className="metric-label")
                         ], className="metric-card")
