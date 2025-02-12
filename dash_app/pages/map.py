@@ -37,19 +37,26 @@ def create_map(filtered_df=None):
             lat="latitude",
             lon="longitude",
             hover_name="nom",
-            hover_data={"adresse_def": True, "logo": False},
-            custom_data=["logo"],
+            mapbox_style='carto- positron',
+            hover_data="adresse_def",
             zoom=5,
             center={"lat": center_lat, "lon": center_lon},
         )
-        fig.update_traces(hovertemplate="<b>%{hovertext}</b><br>%{hoverdata[0]}")
+
+    fig.update_traces(cluster=dict(enabled=True, color="blue", opacity=0.7)) # Affichage des clusters
 
     fig.update_layout(
-        title="Carte des Startups",
-        mapbox_style="open-street-map",
-        margin={"r":0,"t":0,"l":0,"b":0}
+    title="Carte des Startups",
+    mapbox_style="open-street-map",
+    margin={"r": 0, "t": 0, "l": 0, "b": 0},
+    dragmode="zoom",  # ✅ Permet d'utiliser la molette pour zoomer
+    mapbox=dict(
+        zoom=5,
+        center={"lat": center_lat, "lon": center_lon},
     )
+)
     return fig
+
 
 ################################################################################ LAYOUT ################################################################################
 
@@ -110,7 +117,7 @@ layout = html.Div([
                 dbc.Card([
                     dbc.CardHeader("Carte des Startups"),
                     dbc.CardBody([
-                        dcc.Graph(id='map-graph', figure=create_map(), style={"height": "600px"})
+                        dcc.Graph(id='map-graph', figure=create_map(), style={"height": "600px"}, config={'scrollZoom': True})
                     ])
                 ])
             ], width=12)

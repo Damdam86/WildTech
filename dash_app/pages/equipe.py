@@ -48,6 +48,7 @@ layout = html.Div([
 
     # Section des vignettes
     dbc.Container([
-        dbc.Row(team_cards, className="justify-content-center")
+        dbc.Row(team_cards, className="justify-content-center"),
+        html.Br(),
     ], fluid=True)
 ])
