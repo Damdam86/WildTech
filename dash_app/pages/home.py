@@ -34,6 +34,7 @@ def update_startup_info(selected_startup):
                 html.P(f"Marché: {startup_data['market']}", className="text-center"),
                 html.P(f"Effectifs: {startup_data['Effectif_def']}", className="text-center"),
                 html.P(f"Type d'organisme: {startup_data["Type d'organisme"]}", className="text-center"),
+                html.P(f"Catégorie: {startup_data["Sous-Catégorie"]}", className="text-center"),
                 html.P(startup_data['mots_cles_def'], className="text-center")
             ])
         ], className="tech-card"), width=4),
