@@ -27,8 +27,8 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span("1", className="step-number"),
-                                html.H4("Une actualisation automatique des données", className="metric-value"),
-                                html.P("Sur les levées de fonds, les nouvelles startups et la performance financière.", className="text-muted"),
+                                html.H4("Actualisation des données", className="metric-value"),
+                                html.P("Une actualisation automatique / triger sur les levées de fonds, les nouvelles startups et la performance financière permettrait de consolider la base de données.", className="text-muted"),
                             ], className="step-card-content")
                         ], className="step-card")
                     ], md=6, lg=3, className="mb-4"),
@@ -37,8 +37,18 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span("2", className="step-number"),
-                                html.H4("Un suivi des performances au fil du temps", className="metric-value"),
-                                html.P("Comme l'évolution des revenus, des levées de fonds, ou de la taille de l’équipe.", className="text-muted"),
+                                html.H4("Suivi des performances au fil du temps", className="metric-value"),
+                                html.P("Comme l'évolution des revenus, des levées de fonds, ou de la taille de l’équipe, ce suivi pourrait permettre d'afficher des nouveaux KPI interessant sur les startups en France.", className="text-muted"),
+                            ], className="step-card-content")
+                        ], className="step-card")
+                    ], md=6, lg=3, className="mb-4"),
+
+                     dbc.Col([
+                        html.Div([
+                            html.Div([
+                                html.Span("3", className="step-number"),
+                                html.H4("Gestion des catégorie d'entreprises", className="metric-value"),
+                                html.P("Une évolution serait de pouvoir rechercher / afficher les entreprises par catégories. Par manque de temps nous n'avons pas pu mettre en palce cette fonctionnalité.", className="text-muted"),
                             ], className="step-card-content")
                         ], className="step-card")
                     ], md=6, lg=3, className="mb-4")
