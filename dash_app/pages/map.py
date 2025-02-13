@@ -8,8 +8,8 @@ import plotly.express as px
 
 # Chargement des données
 df = get_dataframe('societes.csv')
-df['Sous-Catégorie'] = df['Sous-Catégorie'].str.split("|")
-df = df.explode('Sous-Catégorie')
+df['Sous-Catégorie'] = df['Sous-Catégorie'].apply(lambda x: x.split("|") if isinstance(x, str) else [])
+unique_categories = set(cat for sublist in df['Sous-Catégorie'].dropna() for cat in sublist)
 
 # Moyenne des longitude et lat
 center_lat = df['latitude'].mean()
@@ -27,7 +27,11 @@ def display_hover_image(hoverData):
         return "", "", "", ""
 
     point = hoverData["points"][0]
-    custom_data = point["customdata"] if "customdata" in point else ["", "", "", ""]
+    custom_data = point.get("customdata", [])
+    
+    while len(custom_data) < 5:
+        custom_data.append("")
+
     name = point["hovertext"]
     image_url = custom_data[0] if custom_data[0] else None
     adresse = custom_data[1] if custom_data[1] else "Adresse non disponible"
@@ -73,10 +77,10 @@ def create_map(filtered_df=None):
             center={"lat": center_lat, "lon": center_lon},
         )
 
-    fig.update_traces(marker=dict(size=8), opacity=0.7), # Affichage des clusters
+    #fig.update_traces(marker=dict(size=8), opacity=0.7), # Affichage des clusters
                     
-    #fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7), # Affichage des clusters
-                    #customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie"]].values) 
+    fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7), # Affichage des clusters
+                    customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie", "description"]].values) 
 
     fig.update_layout(
     title="Carte des Startups",
@@ -131,7 +135,7 @@ layout = html.Div([
                                 html.Label("Recherche par catégorie"),
                                 dcc.Dropdown(
                                     id='keyword-dropdown',
-                                    options=[{'label': cat, 'value': cat} for cat in df['Sous-Catégorie'].dropna().unique()],
+                                    options=[{'label': cat, 'value': cat} for cat in unique_categories],
                                     multi=True,
                                     placeholder="Sélectionnez une catégorie"
                                 ),
@@ -189,7 +193,7 @@ def update_map(n_clicks, location, selected_keywords):
         filtered_df = filtered_df[filtered_df['adresse_def'].str.lower().str.contains(location, na=False)]
 
     if selected_keywords:
-        filtered_df = filtered_df[filtered_df['Sous-Catégorie'].fillna("").apply(lambda x: any(kw in x for kw in selected_keywords))]
+        filtered_df = filtered_df[filtered_df['Sous-Catégorie'].apply(lambda x: any(kw in x for kw in selected_keywords))]
 
     return create_map(filtered_df)
 
