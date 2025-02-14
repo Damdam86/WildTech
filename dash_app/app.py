@@ -542,39 +542,54 @@ def top_startup_size(sector, year_range, effectif):
     ]
 )
 def update_top_subcategories(sector, year_range, effectif):
-    df2 = get_dataframe("societes.csv") 
-    
-    df2['date_creation_def'] = pd.to_datetime(df2['date_creation_def'], errors="coerce")
-    df2["annee_creation"] = df2["date_creation_def"].dt.year
+    df = get_dataframe("societes.csv") 
+    df['date_creation_def'] = pd.to_datetime(df['date_creation_def'], errors="coerce")
+    df["annee_creation"] = df["date_creation_def"].dt.year
 
     if sector:
-        df2 = df2[df2["Activité principale"].isin(sector)]
+        df = df[df["Activité principale"].isin(sector)]
     if effectif:
-        df2 = df2[df2["Effectif_def"].isin(effectif)]
+        df = df[df["Effectif_def"].isin(effectif)]
     if year_range:
-        df2 = df2[
-            (df2["annee_creation"].notna()) &
-            (df2["annee_creation"].between(year_range[0], year_range[1]))
+        df = df[
+            (df["annee_creation"].notna()) &
+            (df["annee_creation"].between(year_range[0], year_range[1]))
         ]
 
-    df2 = df2[df2['Sous-Catégorie'] != 0] 
-    top_years = df2.loc[df2["Sous-Catégorie"] != "Divers", "Sous-Catégorie"].value_counts().nlargest(10)
+    df["Sous-Catégorie"] = df["Sous-Catégorie"].apply(lambda x: x.split("|") if isinstance(x, str) else [])
 
+    # Explosion des listes pour obtenir une ligne par sous-catégorie
+    df_exploded = df.explode("Sous-Catégorie")
+
+    # Suppression de la catégorie "Divers"
+    filtered_df = df_exploded[df_exploded['Sous-Catégorie'] != "Divers"]
+
+    # Compter les occurrences des sous-catégories
+    category_counts = filtered_df["Sous-Catégorie"].value_counts().reset_index()
+    category_counts.columns = ["Sous-Catégorie", "Nombre de sociétés"]
+
+    # Triage les catégories en ordre croissant
+    category_counts = category_counts.sort_values(by="Nombre de sociétés", ascending=True)
+
+    # Création du graphique avec Plotly
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=top_years.sort_values(ascending=True).values,
-        y=top_years.sort_values(ascending=True).index.astype(str),
-        orientation='h',
-        marker=dict(color='royalblue'),
+        x=category_counts["Nombre de sociétés"],
+        y=category_counts["Sous-Catégorie"],  
+        orientation='h', 
+        marker=dict(color='royalblue')
     ))
 
+    # Personnalisation du layout
     fig.update_layout(
-        xaxis_title="Fréquence",
-        yaxis_title="Sous-catégorie de mots-clés",
-        yaxis=dict(categoryorder='total ascending')
+        xaxis_title="Nombre de Sociétés",
+        yaxis_title="Sous-Catégorie",
+        template="plotly_white",
+        height=700
     )
 
     return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

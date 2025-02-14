@@ -5,8 +5,7 @@ io_config.yaml
 dash_app/cache-directory/
 **/__pycache__/
 dash_app/assets/financements.csv
-dash_app/assets/financements.csv
+dash_app/assets/personnes.csv
 dash_app/assets/societes.csv
-dash_app/assets/financements.csv
 merged_df.csv
 
