@@ -166,7 +166,7 @@ def update_startup_info(selected_startup):
                     ),
                     html.Img(
                         src=row["logo"] if pd.notna(row["logo"]) else "/assets/default_logo.png",
-                        style={"width": "100px", "height": "200px", "object-fit": "contain", "margin": "0 auto", "display": "block"}
+                        style={"width": "300px", "height": "300px", "object-fit": "contain", "margin": "0 auto", "display": "block"}
                     ),
                     html.Br(
                     ),
