@@ -152,6 +152,6 @@ def update_funding_graph(sector, year_range, effectif):
     return fig
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8050))  # 8050 est une valeur par défaut
-    app.run_server(host='0.0.0.0', port=port)    
-    print(f"🚀 Lancement de l'application sur le port {port}...")
+    port = int(os.environ.get('PORT', 10000))  # Default Render port
+    print(f"🚀 Lancement sur le port {port}...")
+    app.run_server(host='0.0.0.0', port=port, debug=False)
