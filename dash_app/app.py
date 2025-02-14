@@ -6,7 +6,7 @@ import pandas as pd
 from flask_caching import Cache
 import plotly.express as px
 import os
-import json
+from io import StringIO
 
 # Initialisation de l'application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
@@ -38,7 +38,7 @@ def get_dataframe(filename):
     json_string = dataframes.get(filename, "{}")  # Sécuriser l'accès
 
     try:
-        return pd.read_json(json_string, orient='split')
+        return pd.read_json(StringIO(json_string), orient='split')  # Utilisation de StringIO pour éviter FutureWarning
     except ValueError as e:
         print(f"⚠️ Erreur lors de la conversion JSON → DataFrame : {e}")
         return pd.DataFrame()  # Renvoie un DataFrame vide en cas d'erreur
@@ -153,5 +153,6 @@ def update_funding_graph(sector, year_range, effectif):
 
 # Lancement de l'application avec gestion du port Render
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
-    app.run_server(host="0.0.0.0", port=port, debug=False)
+    port = int(os.environ.get("PORT", 10000))  # Essaye un autre port
+    print(f"🚀 Lancement de l'application sur le port {port}...")
+    app.run_server(host="0.0.0.0", port=port, debug=True)
