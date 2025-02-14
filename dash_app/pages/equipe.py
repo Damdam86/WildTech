@@ -21,7 +21,7 @@ team_cards = [
                     [
                         html.H5(member["name"], className="text-center"),
                         html.P(member["role"], className="text-center text-muted"),
-                        html.A("GitHub", href=member["git"], target="_blank", className="metric-label text-center"),
+                        html.A("GitHub", href=member["git"], target="_blank", className="metric-label text-center d-block mx-auto"),
                     ]
                 ),
             ],
@@ -34,7 +34,7 @@ team_cards = [
 ]
 
 layout = html.Div([
-    
+
     html.Div([ 
         dbc.Container([
             dbc.Row([
