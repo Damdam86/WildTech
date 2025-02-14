@@ -1,8 +1,7 @@
-import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
-from app import get_dataframe  # Importer app et la fonction get_dataframe
+from app import get_dataframe
 import plotly.express as px
 
 ################################################################################# CHARGEMENT DONNEES ##############################################################

@@ -1,6 +1,7 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+from app import get_dataframe
 
 # Données de l'équipe
 team_members = [

@@ -1,9 +1,9 @@
 from dash import Dash, html, dcc, Output, Input, State, ALL, callback, callback_context
 import dash_bootstrap_components as dbc
 import pandas as pd
-from app import get_dataframe
 from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
+from app import get_dataframe
 
 # Chargement des données
 df = get_dataframe('societes.csv')
