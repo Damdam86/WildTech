@@ -494,10 +494,6 @@ def deduplicate_and_clean(merged_df):
     # Groupby sans perdre "Effectif_def"
     merged_df = merged_df.groupby("nom", as_index=False).agg(lambda x: merge_values(x) if x.name != "Effectif_def" else x.mode().max())
 
-    print("✅ Vérification après deduplicate_and_clean:", merged_df.columns)  # Vérification
-    print("🔍 Après deduplicate_and_clean :")
-    print(merged_df["Effectif_def"].head(20))
-
     return merged_df
 
 
@@ -565,106 +561,119 @@ def categorie_keywords(merged_df):
     categories = {
     "Technologie": {
         "Intelligence Artificielle": [
-            "artificial intelligence", "deep learning", "machine learning", "IA", "chatbot", 
-            "neural network", "computer vision", "natural language processing", "NLP", "AI", 
-            "ML", "DL", "Big Data", "reinforcement learning", "automated reasoning", 
+            "artificial intelligence", "deep learning", "machine learning", "IA", "chatbot",
+            "neural network", "computer vision", "natural language processing", "NLP", "AI",
+            "ML", "DL", "Big Data", "reinforcement learning", "automated reasoning",
             "speech recognition", "AI ethics", "generative AI", "LLM", "transformer models"
         ],
         "Électronique": [
-            "circuit", "microchip", "semiconductor", "electronics", "PCB", "embedded system", 
+            "circuit", "microchip", "semiconductor", "electronics", "PCB", "embedded system",
             "hardware", "analog circuits", "digital circuits", "IoT", "sensor", "microcontroller",
             "FPGA", "ASIC", "nanotechnology", "electronic design automation", "medical devices", "wearable electronics"
         ],
         "Photonique": [
-            "laser", "optics", "photonics", "holography", "fiber optics", "optoelectronics", 
-            "quantum optics", "spectroscopy", "lightwave technology"
+            "laser", "optics", "photonics", "holography", "fiber optics", "optoelectronics",
+            "quantum optics", "spectroscopy", "lightwave technology", "imagerie", "surfaces",
+        "éclairage", "énergie solaire", "micro-nano-optique", "instrumentation", "affichage", "matériaux"
         ],
         "Robotique": [
-            "robotics", "système autonome", "drone", "humanoid robot", "industrial robots", 
+            "robotics", "système autonome", "drone", "humanoid robot", "industrial robots",
             "swarm robotics", "AI-driven robotics", "cobot", "exoskeleton", "mechatronics"
         ],
-        "Impression 3D": [
-            "impression 3D", "fabrication additive", "3D printing", "stereolithography", 
-            "FDM", "SLS", "bioprinting", "metal 3D printing", "rapid prototyping"
-        ],
-        "Software": [
-            "enterprise software", "logiciel", "software", "application", "progiciel", 
-            "SaaS", "DevOps", "API", "software development", "microservices", 
-            "cloud computing", "open source", "agile development", "low-code", "no-code", 
-            "cybersecurity software"
+        "Software / Cyber": [
+            "enterprise software", "logiciel", "software", "application", "progiciel",
+            "SaaS", "DevOps", "API", "software development", "microservices",
+            "cloud computing", "open source", "agile development", "low-code", "no-code",
+            "cybersecurity software", "blockchain", "distributed ledger", "smart contract", "cybersecurité",
+            "sécurité informatique", "blockchain", "registre distribué", "piratage", "cryptographie", "cryptocurrency",
+            "pirate", "hack", "hacking", "white hat", "black hat", "grey hat", "cyberattaque", "cybersecurity"
         ],
         "Quantique": [
-            "quantum computing", "qubits", "quantum supremacy", "superconducting qubits", 
-            "quantum cryptography", "quantum algorithms", "quantum communication", 
-            "quantum networking", "quantum AI", "quantum physics", "quantum sensors"
+            "quantum computing", "qubits", "quantum supremacy", "superconducting qubits",
+            "quantum cryptography", "quantum algorithms", "quantum communication",
+            "quantum networking", "quantum AI", "quantum physics", "quantum sensors", "quantique", "informatique quantique",
+            "qubit", "suprématie quantique", "algorithmes quantiques", "communication quantique", "réseau quantique"
         ],
         "IoT": [
-            "Internet of Things", "IoT", "smart devices", "connected devices", 
-            "edge computing", "smart sensors", "IoT security", "industrial IoT", 
+            "Internet of Things", "IoT", "smart devices", "connected devices",
+            "edge computing", "smart sensors", "IoT security", "industrial IoT",
             "home automation", "wearable IoT", "5G IoT", "smart cities"
         ],
     },
     "Marché": {
         "Défense": [
-            "military", "aerospace", "defense", "naval", "cybersecurity", "radar", 
-            "electronic warfare", "military AI", "space defense", "drone warfare"
+            "military", "aerospace", "defense", "naval", "cybersecurity", "radar",
+            "electronic warfare", "military AI", "space defense", "drone warfare",
+            "missile technology", "defense industry", "defense technology", "defense contractor"
         ],
         "Agriculture": [
-            "agritech", "precision farming", "vertical farming", "organic farming", "agriculture", 
+            "agritech", "precision farming", "vertical farming", "organic farming", "agriculture",
             "smart irrigation", "drones for agriculture", "genetically modified crops", "agri-robotics"
         ],
         "Transport": [
-            "automobile", "EV", "autonomous vehicles", "aerospace", "mobility", "logistics", 
-            "hyperloop", "urban air mobility", "rail technology", "smart roads", "battery tech", 
-            "transportation", "smart mobility", "electric vehicles", "flying cars"
+            "automobile", "EV", "autonomous vehicles", "aerospace", "mobility", "logistics",
+            "hyperloop", "urban air mobility", "rail technology", "smart roads", "battery tech",
+            "transportation", "smart mobility", "electric vehicles", "flying cars", "transport", "mobilité",
+            "logistique", "technologie ferroviaire", "routes intelligentes", "batterie"
         ],
         "Santé": [
-            "health", "santé", "médical", "biotech", "pharma", "medtech", "e-health", 
+            "health", "santé", "médical", "biotech", "pharma", "medtech", "e-health",
             "telemedicine", "wearable health", "genomics", "bioprinting", "precision medicine",
-            "biotechnology", "medical devices", "healthcare AI", "health data", "health insurance"
+            "biotechnology", "medical devices", "healthcare AI", "health data", "health insurance", "santé", "médecine",
+            "biotechnologie", "dispositifs médicaux", "IA en santé", "données de santé", "assurance santé"
         ],
         "FoodTech": [
-            "food", "agro", "foodtech", "alimentation", "nutrition", "agriculture", 
-            "alternative proteins", "lab-grown meat", "functional foods", "food safety", 
+            "food", "agro", "foodtech", "alimentation", "nutrition", "agriculture",
+            "alternative proteins", "lab-grown meat", "functional foods", "food safety",
             "supply chain transparency", "alimentaire", "food waste reduction", "smart kitchen", "food delivery",
-            "nouriture" 
+            "nouriture"
         ],
         "Énergie": [
-            "énergie", "renewable", "hydrogène", "solaire", "éolien", "batterie", 
-            "stockage énergie", "nuclear energy", "grid optimization", "smart energy", 
+            "énergie", "renewable", "hydrogène", "solaire", "éolien", "batterie",
+            "stockage énergie", "nuclear energy", "grid optimization", "smart energy",
             "hydropower", "carbon capture", "hydrogen", "energy efficiency"
         ],
         "Industrie": [
-            "énergie", "robotics", "robotique", "industrie", "industrie 4.0", "industry", 
+            "énergie", "robotics", "robotique", "industrie", "industrie 4.0", "industry",
             "automated manufacturing", "industrial IoT", "predictive maintenance", "smart factories",
-            "manufacturing", "supply chain", "logistics", "industrial automation", "industrial software"
+            "manufacturing", "supply chain", "logistics", "industrial automation", "industrial software",
+            "iiot","objet connecté", "systèmes cyber-physiques", "cobotique", "simulation", "jumeau numérique",
+            "réalité augmentée", "réalité virtuelle", "maintenance prédictive", "fabrication additive", "impression 3d",
+            "3D printing", "stereolithography", "FDM", "SLS", "bioprinting", "metal 3D printing", "rapid prototyping"
         ],
         "Industrie Culturelle et Créative": [
-            "architecture", "heritage", "art", "foodTech", "cinema", "audiovisual", "design", 
-            "editing", "book", "livre", "EdTech", "media", "presse", "radio", "mode", "fashion", 
-            "music", "video", "gaming", "esport", "graphism", "graphisme", "photography", 
-            "web", "communication", "NFT art", "digital content creation", "VR storytelling"
+            "icc","architecture", "heritage", "art", "foodTech", "cinema", "audiovisual", "design",
+            "editing", "book", "livre", "EdTech", "media", "presse", "radio", "mode", "fashion",
+            "music", "video", "gaming", "esport", "graphism", "graphisme", "photography",
+            "web", "communication", "NFT art", "digital content creation", "VR storytelling", "réalité virtuelle"
         ],
-    },
-    "Mode de Vente": {
-        "SAAS": [
-            "saas", "cloud service", "software-as-a-service", "subscription-based software", 
-            "enterprise SaaS", "multi-tenant SaaS", "B2B SaaS"
+        "Fintech": [
+            "blockchain", "crypto", "néobanque", "insurtech", "regtech",
+            "tokenisation", "stablecoin", "DeFi", "wallet", "biométrie",
+            "fraude", "trading", "crowdfunding", "prêt", "algorithme", "paiement",
+            "assurance", "banque", "finance", "fintech", "cryptocurrency", "digital banking",
+            "paiement numérique", "banque en ligne", "open banking", "identité numérique", "smart contract",
+            "decentralized finance", "peer-to-peer lending", "prêt instantané", "buy now pay later",
+            "gestion de patrimoine", "robo-advisor", "cybersécurité financière", "analyse prédictive",
+            "micro-investissement", "marché financier", "cryptomonnaie"
         ],
-        "Abonnement": [
-            "subscription", "monthly subscription", "membership", "commission", 
-            "recurring revenue", "digital subscription", "subscription box"
+        "EdTech": [
+            "education", "edtech", "e-learning", "online courses", "MOOC", "distance learning",
+            "adaptive learning", "educational technology", "learning management system", "virtual classroom",
+            "learning analytics", "personalized learning", "educational content", "education technology",
+            "formation en ligne", "cours en ligne", "apprentissage adaptatif", "système de gestion de l'apprentissage",
+            "classe virtuelle", "analyse de l'apprentissage", "apprentissage personnalisé", "contenu éducatif"
         ],
         "Marketplace & E-commerce": [
-            "marketplace", "ecommerce", "vente en ligne", "commerce électronique", 
-            "dropshipping", "direct-to-consumer", "B2C marketplace", "C2C marketplace", 
-            "B2B marketplace", "social commerce"
+            "marketplace", "ecommerce", "vente en ligne", "commerce électronique",
+            "dropshipping", "direct-to-consumer", "B2C marketplace", "C2C marketplace",
+            "B2B marketplace", "social commerce", "online shopping", "retail tech", "retail"
         ],
     },
     "Autre": {
         "Divers": [
-            "général", "miscellaneous", "autre", "various", "innovation", "future tech", 
-            "cross-industry", "business development", "entrepreneurship"
+            "général", "miscellaneous", "autre", "various", "innovation", "future tech",
+            "cross-industry", "business development", "entrepreneurship", "bb", "b2b", "b2c"
         ],
         "Inconnu": []
     }
@@ -689,7 +698,7 @@ def categorie_keywords(merged_df):
                         found_subcategories.add(subcategory)
 
             # Vérification avec Fuzzy Matching
-            result = process.extractOne(keyword_lower, all_keywords.keys(), score_cutoff=80)
+            result = process.extractOne(keyword_lower, all_keywords.keys(), score_cutoff=90)
             if result:
                 match, score = result
                 cat, subcat = all_keywords.get(match, ("Autre", "Divers"))

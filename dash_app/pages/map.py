@@ -8,8 +8,8 @@ import plotly.express as px
 
 # Chargement des données
 df = get_dataframe('societes.csv')
-df['Sous-Catégorie'] = df['Sous-Catégorie'].str.split("|")
-df = df.explode('Sous-Catégorie')
+df['Sous-Catégorie'] = df['Sous-Catégorie'].apply(lambda x: x.split("|") if isinstance(x, str) else [])
+unique_categories = set(cat for sublist in df['Sous-Catégorie'].dropna() for cat in sublist)
 
 # Moyenne des longitude et lat
 center_lat = df['latitude'].mean()
@@ -17,17 +17,41 @@ center_lon = df['longitude'].mean()
 
 @callback(
     [Output("image-container", "children"),
-     Output("startup-name", "children")],  # Ajout du nom
+     Output("startup-name", "children"),
+     Output("startup-date", "children"), 
+     Output("startup-category", "children")],
     Input("map-graph", "hoverData")
 )
 def display_hover_image(hoverData):
     if hoverData is None:
-        return "", ""
+        return "", "", "", ""
 
-    image_url = hoverData["points"][0]["customdata"][0] 
-    name = hoverData["points"][0]["hovertext"]
+    point = hoverData["points"][0]
+    custom_data = point.get("customdata", [])
+    
+    while len(custom_data) < 5:
+        custom_data.append("")
 
-    return html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}), html.H3(name, className="text-center mt-3")
+    name = point["hovertext"]
+    image_url = custom_data[0] if custom_data[0] else None
+    adresse = custom_data[1] if custom_data[1] else "Adresse non disponible"
+    date_creation = custom_data[2] if custom_data[2] else "Non disponible"
+    categories = custom_data[3] if custom_data[3] else "Non spécifiée"
+    description = custom_data[4] if custom_data[4] else "Description non disponible"
+
+     # Utilisation de html.Div et <br> pour le saut de ligne
+    startup_info = [f"Adresse: {adresse}",
+                    html.Br(),
+                    f"Date de création: {date_creation}",
+                    html.Br(),
+                    f"Description: {description}"]
+
+    return (
+        html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}),
+        html.H3(name, className="text-center mt-3"),
+        startup_info,
+        f"Catégorie: {categories}"
+    )
 
 # Fonction pour créer la carte
 def create_map(filtered_df=None):
@@ -42,7 +66,10 @@ def create_map(filtered_df=None):
             hover_name="nom",
             hover_data={
                 "logo": False,
-                "adresse_def": True, 
+                "adresse_def": True,
+                "date_creation_def": False,
+                "Sous-Catégorie": True,
+                "description": False,
                 "latitude": False,
                 "longitude": False
             },
@@ -50,7 +77,10 @@ def create_map(filtered_df=None):
             center={"lat": center_lat, "lon": center_lon},
         )
 
-    fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7)) # Affichage des clusters
+    #fig.update_traces(marker=dict(size=8), opacity=0.7), # Affichage des clusters
+                    
+    fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7), # Affichage des clusters
+                    customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie", "description"]].values) 
 
     fig.update_layout(
     title="Carte des Startups",
@@ -105,7 +135,7 @@ layout = html.Div([
                                 html.Label("Recherche par catégorie"),
                                 dcc.Dropdown(
                                     id='keyword-dropdown',
-                                    options=[{'label': cat, 'value': cat} for cat in df['Sous-Catégorie'].dropna().unique()],
+                                    options=[{'label': cat, 'value': cat} for cat in unique_categories],
                                     multi=True,
                                     placeholder="Sélectionnez une catégorie"
                                 ),
@@ -134,7 +164,9 @@ layout = html.Div([
                     dbc.CardHeader("Info startup"),
                     dbc.CardBody([
                         html.Div(id="image-container", style={"textAlign": "center"}),
-                        html.Div(id="startup-name", className="text-center mt-3")  
+                        html.Div(id="startup-name", className="text-center mt-3"),
+                        html.Div(id="startup-date", className="text-center"), 
+                        html.Div(id="startup-category", className="text-center")
                     ])
                 ])
             ], width=4)
@@ -161,7 +193,7 @@ def update_map(n_clicks, location, selected_keywords):
         filtered_df = filtered_df[filtered_df['adresse_def'].str.lower().str.contains(location, na=False)]
 
     if selected_keywords:
-        filtered_df = filtered_df[filtered_df['Sous-Catégorie'].fillna("").apply(lambda x: any(kw in x for kw in selected_keywords))]
+        filtered_df = filtered_df[filtered_df['Sous-Catégorie'].apply(lambda x: any(kw in x for kw in selected_keywords))]
 
     return create_map(filtered_df)
 

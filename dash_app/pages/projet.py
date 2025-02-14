@@ -68,7 +68,8 @@ layout = html.Div([
                 dbc.Col([
                     html.Div([
                         html.Div([
-                            html.Span("8", className="metric-value"),
+                            html.Span("10", className="metric-value"),
+                            html.Br(),
                             html.Span("sources différentes", className="metric-symbol")
                         ], className="metric-number"),
                         html.P("Pour la création de la base", className="metric-label")
@@ -77,8 +78,9 @@ layout = html.Div([
                 dbc.Col([
                     html.Div([
                         html.Div([
-                            html.Span("2 API", className="metric-value"),
-                            html.Span("SIREN et OPENAI", className="metric-symbol")
+                            html.Span("3 API", className="metric-value"),
+                            html.Br(),
+                            html.Span("SIREN, Recherche Société et OPENAI", className="metric-symbol")
                         ], className="metric-number"),
                         html.P("Pour compléter les informations", className="metric-label")
                     ], className="metric-card")
@@ -86,7 +88,8 @@ layout = html.Div([
                 dbc.Col([
                     html.Div([
                         html.Div([
-                            html.Span("XXX", className="metric-value"),
+                            html.Span("+4850", className="metric-value"),
+                            html.Br(),
                             html.Span("mots clés", className="metric-symbol")
                         ], className="metric-number"),
                         html.P("Pour rechercher dans la base", className="metric-label")
@@ -95,8 +98,9 @@ layout = html.Div([
                 dbc.Col([
                     html.Div([
                         html.Div([
-                            html.Span("10", className="metric-value"),
-                            html.Span("k+", className="metric-symbol")
+                            html.Span("10k+", className="metric-value"),
+                            html.Br(),
+                            html.Span("entreprises", className="metric-symbol")
                         ], className="metric-number"),
                         html.P("Dans notre base de données", className="metric-label")
                     ], className="metric-card")
@@ -113,8 +117,10 @@ layout = html.Div([
                         html.Div([
                             html.Span("1", className="step-number"),
                             html.H4("Collecte de Données", className="metric-value"),
-                            html.P("Scraping depuis 8 sources", className="text-muted"),
+                            html.P("Scraping depuis 10 sources", className="text-muted"),
                             html.Ul([
+                                html.Li("Analyse des APIs disponibles"),
+                                html.Li("Analyse ds sites web dédiés aux startups (FrenchTech, BPI, etc.)"),
                                 html.Li("Utilisation de Selenium dans 90% des cas"),
                                 html.Li("Les scraping ne sont pas automatisés"),
                                 html.Li("Difficilement 'automatisable'")
@@ -132,7 +138,8 @@ layout = html.Div([
                                 html.Li("Normalisation des formats"),
                                 html.Li("Explosion des colonnes"),
                                 html.Li("Fusion des mots clés, adresse, site web"),
-                                html.Li("Création d'un pipeline automatisé sous Prefect")
+                                html.Li("Création d'un pipeline automatisé sous Prefect"),
+                                html.Li("Envoi des csv netttoyés sur un bucket S3")
                             ], className="step-list")
                         ])
                     ], className="step-card")
@@ -198,7 +205,10 @@ layout = html.Div([
                         html.Div([
                             dbc.Badge("Pandas", color="primary", className="me-2 mb-2"),
                             dbc.Badge("NumPy", color="success", className="me-2 mb-2"),
-                            dbc.Badge("Scikit-learn", color="info", className="me-2 mb-2")
+                            dbc.Badge("Scikit-learn", color="info", className="me-2 mb-2"),
+                            dbc.Badge("Prefect", color="warning", className="me-2 mb-2"),
+                            dbc.Badge("AWS S3", color="secondary", className="me-2 mb-2"),
+                            dbc.Badge("Fuzzywuzzy", color="red", className="me-2 mb-2")
                         ])
                     ], className="tech-card")
                 ], md=6, lg=3, className="mb-4"),
