@@ -152,6 +152,6 @@ def update_funding_graph(sector, year_range, effectif):
     return fig
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))  # Render utilise le port 8080 par défaut
+    port = int(os.environ.get('PORT', 8050))  # 8050 est une valeur par défaut
+    app.run_server(host='0.0.0.0', port=port)    
     print(f"🚀 Lancement de l'application sur le port {port}...")
-    app.run_server(host="0.0.0.0", port=port)
