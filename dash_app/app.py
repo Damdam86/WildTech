@@ -7,13 +7,16 @@ from flask_caching import Cache
 from io import StringIO
 import plotly.express as px
 import plotly.graph_objects as go
+import os
+import json
+
 
 
 # Initialisation de l'application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
 #Configuration du cache
-cache = Cache(app.server, config={'CACHE_TYPE': 'filesystem', 'CACHE_DIR': 'cache-directory'})
+cache = Cache(app.server, config={'CACHE_TYPE': 'simple'})  # Utilisation du cache en mémoire (moins de consommation)
 TIMEOUT = None #cache permanent jusqu'à redémarrage de l'app 
 
 #Chargement des csv
@@ -30,7 +33,7 @@ def query_all_data():
 def get_dataframe(filename):
     dataframes = query_all_data()  # Récupère tous les datasets en cache
     json_string = dataframes[filename]  # Récupère la chaîne JSON
-    return pd.read_json(StringIO(json_string), orient='split')  # Convertit en DataFrame en utilisant StringIO pour le FutureWarning
+    return pd.DataFrame(json.loads(json_string))
 
 from pages import home, projet, dashboard2, map, equipe, amelioration # Importer les pages
 
@@ -592,4 +595,5 @@ def update_top_subcategories(sector, year_range, effectif):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    port = int(os.environ.get("PORT", 8080))  # Récupère le port défini par Render
+    app.run_server(host="0.0.0.0", port=port, debug=False)
