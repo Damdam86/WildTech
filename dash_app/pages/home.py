@@ -131,8 +131,7 @@ def update_startup_info(selected_startup):
                 html.P(f"Effectifs: {startup_data['Effectif_def']}", className="text-center"),
                 html.P(f"Type d'organisme: {startup_data['Type d\'organisme']}", className="text-center"),
                 html.P(f"Catégorie: ", className="text-center"),
-                html.Div(categories_buttons, className="d-flex justify-content-center"),
-                html.P(startup_data['mots_cles_def'], className="text-center")
+                html.Div(categories_buttons, className="d-flex justify-content-center")
             ])
         ]), width=4),
 
