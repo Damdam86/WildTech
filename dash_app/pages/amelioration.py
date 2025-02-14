@@ -28,7 +28,7 @@ layout = html.Div([
                             html.Div([
                                 html.Span("1", className="step-number"),
                                 html.H4("Actualisation des données", className="metric-value"),
-                                html.P("Une actualisation automatique / triger sur les levées de fonds, les nouvelles startups et la performance financière permettrait de consolider la base de données.", className="text-muted"),
+                                html.P("Une actualisation automatique / trigger sur les levées de fonds, les nouvelles startups et la performance financière permettrait de consolider la base de données.", className="text-muted"),
                             ], className="step-card-content")
                         ], className="step-card")
                     ], md=6, lg=3, className="mb-4"),
@@ -47,8 +47,18 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.Span("3", className="step-number"),
-                                html.H4("Gestion des catégorie d'entreprises", className="metric-value"),
-                                html.P("Une évolution serait de pouvoir rechercher / afficher les entreprises par catégories. Par manque de temps nous n'avons pas pu mettre en palce cette fonctionnalité.", className="text-muted"),
+                                html.H4("Gestion des catégories d'entreprises", className="metric-value"),
+                                html.P("Une évolution serait de pouvoir rechercher / afficher les entreprises par catégories. Par manque de temps nous n'avons pas pu mettre en place cette fonctionnalité.", className="text-muted"),
+                            ], className="step-card-content")
+                        ], className="step-card")
+                    ], md=6, lg=3, className="mb-4"),
+
+                    dbc.Col([
+                        html.Div([
+                            html.Div([
+                                html.Span("4", className="step-number"),
+                                html.H4("Nettoyage des données", className="metric-value"),
+                                html.P("Il faudrait surement reprendre le pipeline. C'était une première et il faudrait surement revoir l'ordre des tasks, créer des nouvelles tasks etc pour améliorer le flow et le nettoyage.", className="text-muted"),
                             ], className="step-card-content")
                         ], className="step-card")
                     ], md=6, lg=3, className="mb-4")

@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 # Données de l'équipe
 team_members = [
     {"name": "Manon", "git": "https://github.com/manongte", "role": "La scrapeuse", "image": "./assets/Manon.png"},
-    {"name": "Farid", "git": "git adresse", "role": "Le plotlyste", "image": "./assets/Farid.png"},
+    {"name": "Farid", "git": "https://github.com/Jouneyd", "role": "Le plotlyste", "image": "./assets/Farid.png"},
     {"name": "Nathalie", "git": "https://github.com/Nathlake", "role": "La SIREN", "image": "./assets/Nathalie.png"},
     {"name": "Damien", "git": "https://github.com/Damdam86", "role": "La pipelette", "image": "./assets/Damien.png"},
 ]
