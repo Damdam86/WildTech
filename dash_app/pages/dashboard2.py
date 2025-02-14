@@ -202,6 +202,15 @@ layout = html.Div([
 
             dbc.Col([
                 dbc.Card([
+                    dbc.CardHeader("Top 10 des sous-catégories de mots-clés"),
+                    dbc.CardBody([
+                        dcc.Graph(id="top-subcategories")
+                    ])
+                ], className="shadow-sm")
+            ], md=12, className="mb-4"),
+
+            dbc.Col([
+                dbc.Card([
                     dbc.CardHeader("Nuage de mots clés"),
                     dbc.CardBody([
                         dcc.Graph(id="cloud-words")

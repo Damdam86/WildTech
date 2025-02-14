@@ -6,6 +6,7 @@ import pandas as pd
 from flask_caching import Cache
 from io import StringIO
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 # Initialisation de l'application
@@ -527,6 +528,50 @@ def top_startup_size(sector, year_range, effectif):
         margin={"r": 10, "t": 40, "l": 10, "b": 10},
         xaxis=dict(visible=False),  # Cacher l'axe X
         yaxis=dict(visible=False)   # Cacher l'axe Y
+    )
+
+    return fig
+
+#Graph catégories: 
+@app.callback(
+    Output("top-subcategories", "figure"),
+    [
+        Input('sector-filter', 'value'),
+        Input('year-filter', 'value'),
+        Input('effectif-filter', 'value')
+    ]
+)
+def update_top_subcategories(sector, year_range, effectif):
+    df2 = get_dataframe("societes.csv") 
+    
+    df2['date_creation_def'] = pd.to_datetime(df2['date_creation_def'], errors="coerce")
+    df2["annee_creation"] = df2["date_creation_def"].dt.year
+
+    if sector:
+        df2 = df2[df2["Activité principale"].isin(sector)]
+    if effectif:
+        df2 = df2[df2["Effectif_def"].isin(effectif)]
+    if year_range:
+        df2 = df2[
+            (df2["annee_creation"].notna()) &
+            (df2["annee_creation"].between(year_range[0], year_range[1]))
+        ]
+
+    df2 = df2[df2['Sous-Catégorie'] != 0] 
+    top_years = df2.loc[df2["Sous-Catégorie"] != "Divers", "Sous-Catégorie"].value_counts().nlargest(10)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=top_years.sort_values(ascending=True).values,
+        y=top_years.sort_values(ascending=True).index.astype(str),
+        orientation='h',
+        marker=dict(color='royalblue'),
+    ))
+
+    fig.update_layout(
+        xaxis_title="Fréquence",
+        yaxis_title="Sous-catégorie de mots-clés",
+        yaxis=dict(categoryorder='total ascending')
     )
 
     return fig
