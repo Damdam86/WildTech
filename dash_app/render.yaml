@@ -3,7 +3,7 @@ services:
     name: StartHub
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python app.py"
+    startCommand: "gunicorn dash_app.app:server"
     envVars:
       - key: PORT
         value: 8080
