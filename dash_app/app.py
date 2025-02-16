@@ -58,7 +58,7 @@ def filter_societe(df, sector, effectif, year_range, year_col="annee_creation"):
     return df
 
 # --- Importation des pages ---
-from pages import home, projet, dashboard2, map, equipe, amelioration
+from dash_app.pages import home, projet, dashboard2, map, equipe, amelioration
 
 # Barre de navigation
 navbar = dbc.NavbarSimple(
