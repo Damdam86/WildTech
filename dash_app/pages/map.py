@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, Output, Input, State
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import callback
-from ..app import get_dataframe
+from app import get_dataframe  # Import absolu depuis le dossier racine
 import plotly.graph_objects as go
 import plotly.express as px
 import ast  # convertir chaîne représentant une liste en vraie liste

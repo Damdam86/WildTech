@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
-from ..app import get_dataframe
+from app import get_dataframe  # Import absolu depuis le dossier racine
 
 # Chargement des données
 df = get_dataframe('societes.csv')

@@ -1,8 +1,6 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from ..app import get_dataframe
-
 
 # Layout de la page avec bandeau d'introduction et perspectives d'amélioration
 layout = html.Div([

@@ -1,7 +1,7 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
-from ..app import get_dataframe
+from app import get_dataframe  # Import absolu depuis le dossier racine
 import plotly.express as px
 
 ################################################################################# CHARGEMENT DONNEES ##############################################################
