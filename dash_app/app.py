@@ -1,7 +1,7 @@
 import os
 import json
 import dash
-from dash import dcc, html
+from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import pandas as pd
@@ -12,19 +12,19 @@ from wordcloud import WordCloud
 from collections import Counter
 
 # Initialisation de l'application
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
-                suppress_callback_exceptions=True)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+server = app.server  # Expose le serveur Flask pour Gunicorn
 cache = Cache(app.server, config={'CACHE_TYPE': 'simple'})
 TIMEOUT = None  # Cache permanent jusqu'au redémarrage de l'app
 
 # --- Chargement des données ---
 @cache.memoize(timeout=TIMEOUT)
 def load_dataframes():
-    files = ["societes.csv", "financements.csv", "personnes.csv"]
     data = {}
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+    files = ["societes.csv", "financements.csv", "personnes.csv"]
     for file in files:
-        path = os.path.join("assets", file)
-        # Charger le CSV une seule fois avec low_memory=False
+        path = os.path.join(base_path, file)
         data[file] = pd.read_csv(path, low_memory=False)
     return data
 
@@ -58,7 +58,7 @@ def filter_societe(df, sector, effectif, year_range, year_col="annee_creation"):
     return df
 
 # --- Importation des pages ---
-from pages import home, projet, dashboard2, map, equipe, amelioration
+from .pages import home, projet, dashboard2, map, equipe, amelioration
 
 # Barre de navigation
 navbar = dbc.NavbarSimple(
@@ -338,5 +338,4 @@ def top_subcategories(sector, year_range, effectif):
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
-    print(f"🚀 Lancement sur le port {port}...")
     app.run_server(host="0.0.0.0", port=port, debug=False)
