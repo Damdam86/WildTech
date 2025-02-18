@@ -6,7 +6,7 @@ from dash import html, dcc
 from flask_caching import Cache
 from dash_app.utils.data_loader import get_dataframe
 from dash_app.utils.preprocessing import preprocess_societe, preprocess_financements, filter_societe
-
+from flask_caching import Cache
 
 # Création de l'app Dash
 app = dash.Dash(
@@ -16,11 +16,11 @@ app = dash.Dash(
 )
 server = app.server  # Pour gunicorn
 
-from dash_app.pages import dashboard2, equipe, home, map, projet, amelioration
-
 # Cache simple en mémoire (optionnel)
 cache = Cache(app.server, config={"CACHE_TYPE": "simple"})
 TIMEOUT = None  # ou un nombre de secondes si vous voulez un TTL
+
+cache.clear()  
 
 ################################################
 # 1) Chargement unique des CSV et prétraitements
@@ -119,3 +119,4 @@ if __name__ == "__main__":
     # Exemple : 1 seul worker pour éviter de saturer la RAM
     # (ou ajuster gunicorn dans votre Procfile)
     app.run_server(host="0.0.0.0", port=8080, debug=False)
+
