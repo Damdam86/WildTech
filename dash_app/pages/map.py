@@ -1,19 +1,15 @@
-from dash import Dash, html, dcc, Output, Input, State
+from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import callback
 from ..app import get_dataframe
 import plotly.graph_objects as go
 import plotly.express as px
-import ast  # convertir chaîne représentant une liste en vraie liste
+import ast
 
-
-# Chargement des données
+# Chargement et prétraitement des données
 df = get_dataframe('societes.csv')
 df['Sous-Catégorie'] = df['Sous-Catégorie'].apply(lambda x: x.split("|") if isinstance(x, str) else [])
-unique_categories = sorted(set(cat for sublist in df['Sous-Catégorie'].dropna() for cat in sublist))
-
-# Moyenne des longitude et lat
+unique_categories = sorted({cat for sublist in df['Sous-Catégorie'].dropna() for cat in sublist})
 center_lat = df['latitude'].mean()
 center_lon = df['longitude'].mean()
 
@@ -27,102 +23,66 @@ center_lon = df['longitude'].mean()
 def display_hover_image(hoverData):
     if hoverData is None:
         return "", "", "", ""
-
     point = hoverData["points"][0]
     custom_data = point.get("customdata", [])
-
     while len(custom_data) < 5:
         custom_data.append("")
-
     name = point["hovertext"]
     image_url = custom_data[0] if custom_data[0] else None
     adresse = custom_data[1] if custom_data[1] else "Adresse non disponible"
     date_creation = custom_data[2] if custom_data[2] else "Non disponible"
     categories = custom_data[3] if custom_data[3] else "Non spécifiée"
     description = custom_data[4] if custom_data[4] else "Description non disponible"
-
     categories_list = ast.literal_eval(categories) if isinstance(categories, str) else []
+    categories_buttons = [html.Button(category.strip(), className="btn btn-outline-primary btn-sm m-1 disabled")
+                          for category in categories_list if category.strip()]
+    startup_info = [f"Adresse: {adresse}", html.Br(), f"Date de création: {date_creation}",
+                    html.Br(), f"Description: {description}", html.Br()]
+    return (html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}),
+            html.H3(name, className="text-center mt-3"),
+            startup_info,
+            html.Div(categories_buttons, className="d-flex justify-content-center flex-wrap"))
 
-    # Création des boutons pour les catégories
-    categories_buttons = [html.Button(category.strip(), className="btn btn-outline-primary btn-sm m-1 disabled")for category in categories_list if category.strip()]  # Vérifie que la catégorie n'est pas vide
-
-     # Utilisation de html.Div et <br> pour le saut de ligne
-    startup_info = [f"Adresse: {adresse}",
-                    html.Br(),
-                    f"Date de création: {date_creation}",
-                    html.Br(),
-                    f"Description: {description}",
-                    html.Br()
-                    ]
-
-    return (
-        html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}),
-        html.H3(name, className="text-center mt-3"),
-        startup_info,
-        html.Div(categories_buttons, className="d-flex justify-content-center flex-wrap")
-    )
-
-# Fonction pour créer la carte
 def create_map(filtered_df=None):
     if filtered_df is None:
         filtered_df = df
-
-    if 'latitude' in filtered_df.columns and 'longitude' in filtered_df.columns:
-        fig = px.scatter_mapbox(
-            filtered_df,
-            lat="latitude",
-            lon="longitude",
-            hover_name="nom",
-            hover_data={
-                "logo": False,
-                "adresse_def": True,
-                "date_creation_def": False,
-                "Sous-Catégorie": False,
-                "description": False,
-                "latitude": False,
-                "longitude": False
-            },
-            zoom=5,
-            center={"lat": center_lat, "lon": center_lon},
-        )
-
-    #fig.update_traces(marker=dict(size=8), opacity=0.7), # Affichage sans clusters
-                    
-    fig.update_traces(marker=dict(size=14), cluster=dict(enabled=True, color="blue", opacity=0.7), # Affichage avec clusters
-                    customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie", "description"]].astype(str).values)
-
-    fig.update_layout(
-    title="Carte des Startups",
-    mapbox_style="open-street-map",
-    margin={"r": 0, "t": 0, "l": 0, "b": 0},
-    dragmode="zoom",  # Permet d'utiliser la molette pour zoomer
-    mapbox=dict(
+    fig = px.scatter_mapbox(
+        filtered_df,
+        lat="latitude",
+        lon="longitude",
+        hover_name="nom",
+        hover_data={"logo": False, "adresse_def": True, "date_creation_def": False,
+                    "Sous-Catégorie": False, "description": False,
+                    "latitude": False, "longitude": False},
         zoom=5,
-        center={"lat": center_lat, "lon": center_lon},
+        center={"lat": center_lat, "lon": center_lon}
     )
-)
+    fig.update_traces(marker=dict(size=14),
+                      cluster=dict(enabled=True, color="blue", opacity=0.7),
+                      customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie", "description"]].astype(str).values)
+    fig.update_layout(
+        title="Carte des Startups",
+        mapbox_style="open-street-map",
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        dragmode="zoom",
+        mapbox=dict(zoom=5, center={"lat": center_lat, "lon": center_lon})
+    )
     return fig
 
-
-################################################################################ LAYOUT ################################################################################
-
 layout = html.Div([
-# Hero Section avec image de fond et overlay
+    # Hero Section
     html.Div([
         dbc.Container([
             dbc.Row([
                 dbc.Col([
                     html.H1("La carte", className="hero-title mb-4"),
-                    html.H5(
-                        "Retrouvez les startups proches de chez vous.",
-                        className="hero-subtitle mb-4"
-                    ),
+                    html.H5("Retrouvez les startups proches de chez vous.", className="hero-subtitle mb-4")
                 ], md=8, lg=8)
             ], className="min-vh-75 align-items-center")
         ], fluid=True)
     ], className="hero-section mb-5"),
 
-        # Section recherche
+    # Section Recherche
     dbc.Container([
         dbc.Row([
             dbc.Col([
@@ -132,14 +92,8 @@ layout = html.Div([
                         dbc.Row([
                             dbc.Col([
                                 html.Label("Recherche par ville"),
-                                dbc.Input(
-                                    id="location-search",
-                                    type="text",
-                                    placeholder="Entrez une ville",
-                                    className="mb-3"
-                                ),
+                                dbc.Input(id="location-search", type="text", placeholder="Entrez une ville", className="mb-3")
                             ], md=6),
-                        
                             dbc.Col([
                                 html.Label("Recherche par catégorie"),
                                 dcc.Dropdown(
@@ -147,25 +101,23 @@ layout = html.Div([
                                     options=[{'label': cat, 'value': cat} for cat in unique_categories],
                                     multi=True,
                                     placeholder="Sélectionnez une catégorie"
-                                ),
+                                )
                             ], md=6),
                         ]),
-                        dbc.Button("Rechercher", id="search-button", color="primary", className="mt-3"),
+                        dbc.Button("Rechercher", id="search-button", color="primary", className="mt-3")
                     ])
                 ], className="mb-4")
             ], width=12)
         ])
     ]),
 
-    # Section carte
+    # Section Carte
     dbc.Container([
         dbc.Row([
             dbc.Col([
                 dbc.Card([
                     dbc.CardHeader("Carte des Startups"),
-                    dbc.CardBody([
-                        dcc.Graph(id='map-graph', figure=create_map(), style={"height": "600px"}, config={'scrollZoom': True})
-                    ])
+                    dbc.CardBody([dcc.Graph(id='map-graph', figure=create_map(), style={"height": "600px"}, config={'scrollZoom': True})])
                 ])
             ], width=8),
             dbc.Col([
@@ -182,29 +134,3 @@ layout = html.Div([
         ], className="mb-5"),
     ])
 ])
-
-# Callbacks
-# State : Ne déclenche pas le callback mais sa valeur est accessible quand le callback est exécuté
-@callback(
-    Output('map-graph', 'figure'),
-    [Input('search-button', 'n_clicks')],
-    [State('location-search', 'value'),
-    State('keyword-dropdown', 'value')]
-)
-def update_map(n_clicks, location, selected_keywords):
-    if n_clicks is None:
-        return create_map()
-
-    filtered_df = df.copy()
-
-    if location:
-        location = location.lower()
-        filtered_df = filtered_df[filtered_df['adresse_def'].str.lower().str.contains(location, na=False)]
-
-    if selected_keywords:
-        filtered_df = filtered_df[filtered_df['Sous-Catégorie'].apply(lambda x: any(kw in x for kw in selected_keywords))]
-
-    return create_map(filtered_df)
-
-
-

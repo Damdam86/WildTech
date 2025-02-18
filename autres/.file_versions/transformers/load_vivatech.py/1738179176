@@ -1,1 +1,0 @@
-partners_viva_tech.csv

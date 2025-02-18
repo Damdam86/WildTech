@@ -1,1 +1,1 @@
-web: gunicorn dash_app.app:server
+web: gunicorn dash_app.app:server --timeout 120

@@ -5,60 +5,47 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from ..app import get_dataframe
 
-df= get_dataframe('societes.csv')
-
-################################################################################ LAYOUT ################################################################################
+df = get_dataframe('societes.csv')
 
 layout = html.Div([
-    # Hero Section avec image de fond et overlay
+    # Hero Section
     html.Div([
         dbc.Container([
             dbc.Row([
                 dbc.Col([
                     html.H1("Le Projet", className="hero-title mb-4"),
-                    html.H5(
-                        "Une analyse approfondie de l'écosystème startup français basée sur plus de 10,000 entreprises",
-                        className="hero-subtitle mb-4"
-                    ),
+                    html.H5("Une analyse approfondie de l'écosystème startup français basée sur plus de 10,000 entreprises", className="hero-subtitle mb-4")
                 ], md=8, lg=6)
             ], className="min-vh-75 align-items-center")
         ], fluid=True)
     ], className="hero-section mb-5"),
 
     dbc.Container([
-        # Section Métriques
+        # Section Objectifs Pédagogiques
         html.Div([
             html.H2("Objectifs Pédagogiques", className="section-title text-center mb-5"),
             dbc.Row([
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("Collecte de données", className="metric-value"),
-                        ], className="metric-number"),
+                        html.Div([html.Span("Collecte de données", className="metric-value")], className="metric-number"),
                         html.P("Acquisition de données depuis diverses sources (APIs, fichiers, bases de données).", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4"),
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("Cleaning - pipeline", className="metric-value"),
-                        ], className="metric-number"),
+                        html.Div([html.Span("Cleaning - pipeline", className="metric-value")], className="metric-number"),
                         html.P("Application de techniques de traitement des données avec Python. Conception et mise en œuvre d’un processus d’Extraction, Transformation et Chargement.", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4"),
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("Visualisation et reporting ", className="metric-value"),
-                        ], className="metric-number"),
+                        html.Div([html.Span("Visualisation et reporting ", className="metric-value")], className="metric-number"),
                         html.P("Création d'un tableau de bord dynamique et interactif.", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4"),
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("IA et enrichissement", className="metric-value"),
-                        ], className="metric-number"),
+                        html.Div([html.Span("IA et enrichissement", className="metric-value")], className="metric-number"),
                         html.P("Exploration des apports de l’intelligence artificielle dans l’analyse des données.", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4")
@@ -67,47 +54,34 @@ layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("10", className="metric-value"),
-                            html.Br(),
-                            html.Span("sources différentes", className="metric-symbol")
-                        ], className="metric-number"),
+                        html.Div([html.Span("10", className="metric-value"), html.Br(),
+                                  html.Span("sources différentes", className="metric-symbol")], className="metric-number"),
                         html.P("Pour la création de la base", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4"),
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("3 API", className="metric-value"),
-                            html.Br(),
-                            html.Span("SIREN, Recherche Société et OPENAI", className="metric-symbol")
-                        ], className="metric-number"),
+                        html.Div([html.Span("3 API", className="metric-value"), html.Br(),
+                                  html.Span("SIREN, Recherche Société et OPENAI", className="metric-symbol")], className="metric-number"),
                         html.P("Pour compléter les informations", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4"),
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("+4850", className="metric-value"),
-                            html.Br(),
-                            html.Span("mots clés", className="metric-symbol")
-                        ], className="metric-number"),
+                        html.Div([html.Span("+4850", className="metric-value"), html.Br(),
+                                  html.Span("mots clés", className="metric-symbol")], className="metric-number"),
                         html.P("Pour rechercher dans la base", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4"),
                 dbc.Col([
                     html.Div([
-                        html.Div([
-                            html.Span("10k+", className="metric-value"),
-                            html.Br(),
-                            html.Span("entreprises", className="metric-symbol")
-                        ], className="metric-number"),
+                        html.Div([html.Span("10k+", className="metric-value"), html.Br(),
+                                  html.Span("entreprises", className="metric-symbol")], className="metric-number"),
                         html.P("Dans notre base de données", className="metric-label")
                     ], className="metric-card")
                 ], md=6, lg=3, className="mb-4")
             ])
         ], className="mb-5"),
-
         # Section Notre Approche
         html.Div([
             html.H2("Notre Approche", className="section-title text-center mb-5", id="methodology"),
@@ -120,7 +94,7 @@ layout = html.Div([
                             html.P("Scraping depuis 10 sources", className="text-muted"),
                             html.Ul([
                                 html.Li("Analyse des APIs disponibles"),
-                                html.Li("Analyse ds sites web dédiés aux startups (FrenchTech, BPI, etc.)"),
+                                html.Li("Analyse des sites web dédiés aux startups (FrenchTech, BPI, etc.)"),
                                 html.Li("Utilisation de Selenium dans 90% des cas"),
                                 html.Li("Les scraping ne sont pas automatisés"),
                                 html.Li("Difficilement 'automatisable'")
@@ -139,7 +113,7 @@ layout = html.Div([
                                 html.Li("Explosion des colonnes"),
                                 html.Li("Fusion des mots clés, adresse, site web"),
                                 html.Li("Création d'un pipeline automatisé sous Prefect"),
-                                html.Li("Envoi des csv netttoyés sur un bucket S3")
+                                html.Li("Envoi des CSV nettoyés sur un bucket S3")
                             ], className="step-list")
                         ])
                     ], className="step-card")
@@ -174,7 +148,6 @@ layout = html.Div([
                 ], md=6, lg=3, className="mb-4")
             ])
         ], className="mb-5"),
-
         # Section Technologies
         html.Div([
             html.H2("Technologies utilisées", className="section-title text-center mb-5"),
@@ -222,10 +195,11 @@ layout = html.Div([
                     ], className="tech-card")
                 ], md=6, lg=3, className="mb-4")
             ])
-        ], className="mb-5"), 
-# La base
-       html.Div([
-    html.H2("Notre base de données", className="section-title text-center mb-5"),
-    html.Img(src="/assets/data_def.png", style={"width": "100%"})
-], className="project-page bg-white py-5")
-], fluid=True, className="project-page")])
+        ], className="mb-5"),
+        # Section Base de Données
+        html.Div([
+            html.H2("Notre base de données", className="section-title text-center mb-5"),
+            html.Img(src="/assets/data_def.png", style={"width": "100%"})
+        ], className="project-page bg-white py-5")
+    ], fluid=True)
+])

@@ -10,32 +10,26 @@ team_members = [
     {"name": "Damien", "git": "https://github.com/Damdam86", "role": "La pipelette", "image": "./assets/Damien.png"},
 ]
 
-# Les cartes de l'équipe
+# Création des cartes pour chaque membre
 team_cards = [
     dbc.Col(
-        dbc.Card(
-            [
-                dbc.CardImg(src=member["image"], top=True, className="rounded-circle mx-auto d-block",
-                            style={"width": "150px", "height": "150px"}),
-                dbc.CardBody(
-                    [
-                        html.H5(member["name"], className="text-center"),
-                        html.P(member["role"], className="text-center text-muted"),
-                        html.A("GitHub", href=member["git"], target="_blank", className="metric-label text-center d-block mx-auto"),
-                    ]
-                ),
-            ],
-            className="metric-value",
-            style={"border-radius": "10px", "overflow": "hidden"}
-        ),
+        dbc.Card([
+            dbc.CardImg(src=member["image"], top=True, className="rounded-circle mx-auto d-block",
+                        style={"width": "150px", "height": "150px"}),
+            dbc.CardBody([
+                html.H5(member["name"], className="text-center"),
+                html.P(member["role"], className="text-center text-muted"),
+                html.A("GitHub", href=member["git"], target="_blank", className="metric-label text-center d-block mx-auto"),
+            ]),
+        ], style={"border-radius": "10px", "overflow": "hidden"}, className="metric-value"),
         md=3
     )
     for member in team_members
 ]
 
 layout = html.Div([
-
-    html.Div([ 
+    # Section Hero
+    html.Div([
         dbc.Container([
             dbc.Row([
                 dbc.Col([
@@ -46,7 +40,7 @@ layout = html.Div([
         ], fluid=True)
     ], className="hero-section mb-5"),
 
-    # Section des vignettes
+    # Section des cartes
     dbc.Container([
         dbc.Row(team_cards, className="justify-content-center"),
         html.Br(),
