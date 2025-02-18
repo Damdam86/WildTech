@@ -1,7 +1,7 @@
 from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import pandas as pd
-from ..app import get_dataframe
+from dash_app.utils.data_loader import get_dataframe
 import plotly.graph_objects as go
 import plotly.express as px
 import ast

@@ -4,6 +4,9 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import html, dcc
 from flask_caching import Cache
+from dash_app.utils.data_loader import get_dataframe
+from dash_app.utils.preprocessing import preprocess_societe, preprocess_financements, filter_societe
+
 
 # Création de l'app Dash
 app = dash.Dash(
@@ -12,6 +15,8 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 server = app.server  # Pour gunicorn
+
+from dash_app.pages import dashboard2, equipe, home, map, projet, amelioration
 
 # Cache simple en mémoire (optionnel)
 cache = Cache(app.server, config={"CACHE_TYPE": "simple"})

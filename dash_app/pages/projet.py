@@ -3,7 +3,7 @@ import pandas as pd
 import missingno as msno
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from ..app import get_dataframe
+from dash_app.utils.data_loader import get_dataframe
 
 df = get_dataframe('societes.csv')
 

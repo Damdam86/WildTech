@@ -6,10 +6,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 from collections import Counter
-# L'import de wordcloud a été retiré, car le wordcloud est désactivé
+from dash_app.utils.data_loader import get_dataframe
+from dash_app.app import app
+
+
 
 # Import des fonctions utilitaires et de l'instance de l'app
-from dash_app.app import app, get_dataframe, preprocess_societe, preprocess_financements, filter_societe
+from dash_app.utils.preprocessing import preprocess_societe, preprocess_financements, filter_societe
 
 ########################################
 # Chargement et prétraitement des données
@@ -35,14 +38,14 @@ df_financements['Montant_def'] = pd.to_numeric(df_financements["Montant_def"], e
 layout = html.Div([
     # En-tête
     html.Div([
-        dbc.Container([
+        dbc.Container([ 
             dbc.Row([
                 dbc.Col([
                     html.H1("Dashboard Financement", className="hero-title mb-4"),
                     html.H5("Analyse du financement de l'écosystème startup français", className="hero-subtitle mb-4")
                 ], md=8, lg=6)
             ], className="min-vh-75 align-items-center")
-        ], fluid=True)
+        ], fluid=True) 
     ], className="hero-section mb-5"),
 
     dbc.Container([
@@ -133,7 +136,7 @@ layout = html.Div([
             )
         ]),
 
-        # Graphiques
+       # Graphiques
         dbc.Row([
             dbc.Col(
                 dbc.Card([
@@ -177,10 +180,11 @@ layout = html.Div([
                     dbc.CardBody([dcc.Graph(id="top-subcategories")])
                 ], className="shadow-sm"), md=12, className="mb-4"
             )
-        ], fluid=False)
-    ], fluid=True)
-])
+        ]), 
 
+        dbc.Container([...], fluid=True)  
+    ])
+])
 ########################################
 # Callbacks de la page Dashboard
 ########################################

@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
-from ..app import get_dataframe
+from dash_app.utils.data_loader import get_dataframe
 
 # Chargement des données
 df = get_dataframe('societes.csv')
