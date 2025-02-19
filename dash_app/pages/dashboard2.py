@@ -73,7 +73,7 @@ layout = html.Div([
                         html.Label("Année de Création", className="text-muted mb-2"),
                         dcc.RangeSlider(
                             id="year-filter",
-                            min=min_year,
+                            min=1986,
                             max=max_year,
                             value=[min_year, max_year],
                             marks={i: str(i) for i in range(min_year, max_year + 1, 4)},
@@ -240,19 +240,29 @@ def update_dashboard(sector, year_range, effectif):
             funding_by_year,
             x="Année",
             y="Montant_def",
-            title="Évolution des financements par année",
             labels={"Montant_def": "Montant total (€)", "Année": "Année"},
             template="plotly_white"
         )
 
         # 2. Répartition par série
-        series_dist = df_fin["Série"].value_counts()
+        all_series = []
+        for series_list in df_fin["Série"].fillna("").astype(str).str.split("|"):
+            if isinstance(series_list, list):
+                all_series.extend([serie.strip() for serie in series_list if serie.strip() and serie.strip() != 'nan'])
+
+        # Compter les occurrences de chaque série et trier par ordre décroissant
+        series_dist = pd.Series(all_series).value_counts().sort_values(ascending=False)
+
+        # Définir explicitement les catégories pour éviter l'erreur
+        series_dist.index = pd.Categorical(series_dist.index, categories=series_dist.index, ordered=True)
+
+        # Création du graphique avec tri décroissant
         fig_series = px.bar(
             x=series_dist.index,
             y=series_dist.values,
-            title="Distribution des séries de financement",
             labels={"x": "Série", "y": "Nombre de financements"},
-            template="plotly_white"
+            template="plotly_white",
+            category_orders={"x": series_dist.index.tolist()}  # Garantir le tri décroissant
         )
 
         # 3. Top entreprises financées
@@ -262,7 +272,6 @@ def update_dashboard(sector, year_range, effectif):
             top_companies,
             x="nom",
             y="Montant_def",
-            title="Top 10 des entreprises par montant levé",
             labels={"nom": "Entreprise", "Montant_def": "Montant total (€)"},
             template="plotly_white"
         )
@@ -274,7 +283,6 @@ def update_dashboard(sector, year_range, effectif):
             startups_by_year,
             x="annee_creation",
             y="entreprise_id",
-            title="Évolution du nombre de startups créées par année",
             labels={"annee_creation": "Année", "entreprise_id": "Nombre de startups"},
             template="plotly_white"
         )
@@ -284,10 +292,10 @@ def update_dashboard(sector, year_range, effectif):
         fig_sectors = px.bar(
             x=sector_dist.values,
             y=sector_dist.index,
-            title="Top 10 des secteurs d'activité",
             labels={"x": "Nombre d'entreprises", "y": "Secteur"},
             template="plotly_white",
-            orientation='h'
+            orientation='h',
+            category_orders={"y": sector_dist.index.tolist()}
         )
 
         # 6. Distribution par taille
@@ -295,7 +303,6 @@ def update_dashboard(sector, year_range, effectif):
         fig_size = px.pie(
             values=size_dist.values,
             names=size_dist.index,
-            title="Distribution des effectifs",
             template="plotly_white"
         )
 
@@ -309,10 +316,10 @@ def update_dashboard(sector, year_range, effectif):
         fig_subcategories = px.bar(
             x=subcategory_counts.values,
             y=subcategory_counts.index,
-            title="Top 10 des sous-catégories",
             labels={"x": "Nombre d'entreprises", "y": "Sous-catégorie"},
             template="plotly_white",
-            orientation='h'
+            orientation='h',
+            category_orders={"y": subcategory_counts.index.tolist()}
         )
 
         # Formatage des KPIs
