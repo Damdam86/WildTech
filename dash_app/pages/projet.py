@@ -1,6 +1,5 @@
 import dash
 import pandas as pd
-import missingno as msno
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash_app.utils.data_loader import get_dataframe

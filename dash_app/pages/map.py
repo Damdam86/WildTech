@@ -8,8 +8,10 @@ import ast
 
 # Chargement et prétraitement des données
 df = get_dataframe('societes.csv')
-df['Sous-Catégorie'] = df['Sous-Catégorie'].apply(lambda x: x.split("|") if isinstance(x, str) else [])
-unique_categories = sorted({cat for sublist in df['Sous-Catégorie'].dropna() for cat in sublist})
+# Convertir d'abord en string pour éviter les problèmes avec le type catégorie
+df['Sous-Catégorie'] = df['Sous-Catégorie'].astype(str)
+df['Sous-Catégorie_list'] = df['Sous-Catégorie'].apply(lambda x: x.split("|") if x and x != 'nan' else [])
+unique_categories = sorted({cat.strip() for sublist in df['Sous-Catégorie_list'] for cat in sublist if cat.strip()})
 center_lat = df['latitude'].mean()
 center_lon = df['longitude'].mean()
 
@@ -33,15 +35,32 @@ def display_hover_image(hoverData):
     date_creation = custom_data[2] if custom_data[2] else "Non disponible"
     categories = custom_data[3] if custom_data[3] else "Non spécifiée"
     description = custom_data[4] if custom_data[4] else "Description non disponible"
-    categories_list = ast.literal_eval(categories) if isinstance(categories, str) else []
-    categories_buttons = [html.Button(category.strip(), className="btn btn-outline-primary btn-sm m-1 disabled")
-                          for category in categories_list if category.strip()]
-    startup_info = [f"Adresse: {adresse}", html.Br(), f"Date de création: {date_creation}",
-                    html.Br(), f"Description: {description}", html.Br()]
-    return (html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}),
-            html.H3(name, className="text-center mt-3"),
-            startup_info,
-            html.Div(categories_buttons, className="d-flex justify-content-center flex-wrap"))
+    
+    # Traitement des catégories
+    try:
+        categories_list = categories.split("|") if categories and categories != 'nan' else []
+    except:
+        categories_list = []
+    
+    categories_buttons = [
+        html.Button(
+            category.strip(),
+            className="btn btn-outline-primary btn-sm m-1 disabled"
+        ) for category in categories_list if category.strip()
+    ]
+    
+    startup_info = [
+        f"Adresse: {adresse}", html.Br(),
+        f"Date de création: {date_creation}", html.Br(),
+        f"Description: {description}", html.Br()
+    ]
+    
+    return (
+        html.Img(src=image_url, style={"width": "150px", "margin": "0 auto", "display": "block"}),
+        html.H3(name, className="text-center mt-3"),
+        startup_info,
+        html.Div(categories_buttons, className="d-flex justify-content-center flex-wrap")
+    )
 
 def create_map(filtered_df=None):
     if filtered_df is None:
@@ -51,15 +70,23 @@ def create_map(filtered_df=None):
         lat="latitude",
         lon="longitude",
         hover_name="nom",
-        hover_data={"logo": False, "adresse_def": True, "date_creation_def": False,
-                    "Sous-Catégorie": False, "description": False,
-                    "latitude": False, "longitude": False},
+        hover_data={
+            "logo": False,
+            "adresse_def": True,
+            "date_creation_def": False,
+            "Sous-Catégorie": False,
+            "description": False,
+            "latitude": False,
+            "longitude": False
+        },
         zoom=5,
         center={"lat": center_lat, "lon": center_lon}
     )
-    fig.update_traces(marker=dict(size=14),
-                      cluster=dict(enabled=True, color="blue", opacity=0.7),
-                      customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie", "description"]].astype(str).values)
+    fig.update_traces(
+        marker=dict(size=14),
+        cluster=dict(enabled=True, color="blue", opacity=0.7),
+        customdata=filtered_df[["logo", "adresse_def", "date_creation_def", "Sous-Catégorie", "description"]].astype(str).values
+    )
     fig.update_layout(
         title="Carte des Startups",
         mapbox_style="open-street-map",
@@ -68,6 +95,27 @@ def create_map(filtered_df=None):
         mapbox=dict(zoom=5, center={"lat": center_lat, "lon": center_lon})
     )
     return fig
+
+@callback(
+    Output("map-graph", "figure"),
+    [Input("search-button", "n_clicks")],
+    [State("location-search", "value"),
+     State("keyword-dropdown", "value")]
+)
+def update_map(n_clicks, location, keywords):
+    if n_clicks is None:
+        return create_map()
+    
+    filtered_df = df.copy()
+    
+    if location:
+        filtered_df = filtered_df[filtered_df['adresse_def'].str.contains(location, case=False, na=False)]
+    
+    if keywords:
+        mask = filtered_df['Sous-Catégorie_list'].apply(lambda x: any(k in x for k in keywords))
+        filtered_df = filtered_df[mask]
+    
+    return create_map(filtered_df)
 
 layout = html.Div([
     # Hero Section

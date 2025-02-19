@@ -1,0 +1,20 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Image": {
+      "Name": "starthub-dashboard",
+      "Update": "true"
+    },
+    "Ports": [
+      {
+        "ContainerPort": "8000",
+        "HostPort": "8000"
+      }
+    ],
+    "Volumes": [
+      {
+        "HostDirectory": "/var/app/current/dash_app/assets",
+        "ContainerDirectory": "/app/dash_app/assets"
+      }
+    ]
+  }
+  
